@@ -1,18 +1,42 @@
 // import React from 'react';
 // import Card from './Card.jsx';
-// import { Link } from 'react-router-dom'; // <-- We need Link for the "View All" button
-// import { importData, overviewSummaryData } from '../data/mockData.js'; 
+// import { Link } from 'react-router-dom';
+// import { 
+//   importData, 
+//   overviewSummaryData,
+//   wirelessPreviewData,
+//   transportPreviewData,
+//   wirelinePreviewData,
+//   totalPreviewData
+// } from '../data/mockData.js';
+// import UploadChart from './UploadChart.jsx'; // The bottom-left bar chart
 
-// // NEW: Accept 'activePreview' and 'onCardClick' props
+// // --- NEW: Function to get data for the preview table ---
+// const getPreviewTableData = (previewCategory) => {
+//   switch (previewCategory) {
+//     case 'wireless':
+//       return wirelessPreviewData;
+//     case 'transport':
+//       return transportPreviewData;
+//     case 'wireline':
+//       return wirelinePreviewData;
+//     case 'total no. of data': // Make sure this matches the card title
+//       return totalPreviewData;
+//     default:
+//       return wirelessPreviewData;
+//   }
+// };
+
+// // --- Your DashboardContent Component ---
 // function DashboardContent({ activePreview, onCardClick }) {
   
 //   const summaryData = overviewSummaryData; 
-//   // NEW: The chart title is now dynamic
 //   const chartTitle = `Preview of ${activePreview} Data`;
+//   const tableData = getPreviewTableData(activePreview); // Get dynamic table data
 
 //   return (
 //     <>
-//       {/* --- Summary Cards --- */}
+//       {/* --- SECTION 1: Summary Cards --- */}
 //       <section className="summary-cards">
 //         {summaryData.map((data) => (
 //           <Card
@@ -20,46 +44,59 @@
 //             title={data.title}
 //             value={data.value}
 //             stats={data.stats}
-//             // NEW: Pass the click handler and active state
 //             onClick={() => onCardClick(data.title)} 
 //             isActive={activePreview === data.title} 
 //           />
 //         ))}
 //       </section>
 
-//       {/* --- Main Chart --- */}
+//       {/* --- SECTION 2: Main Data Preview (MODIFIED) --- */}
 //       <section className="chart-container">
         
-//         {/* NEW: Header with dynamic title and "View All" button */}
 //         <div className="chart-header">
 //           <h2>{chartTitle}</h2>
 //           <Link 
-//             to={`/data/${activePreview}`} 
+//             to={`/dashboard/data/${activePreview === 'total no. of data' ? 'total' : activePreview}`} // Pass the category to the URL
 //             className="view-all-btn btn btn-secondary"
 //           >
 //             View All
 //           </Link>
 //         </div>
         
-//         {/* The chart placeholder (this is where you'd show the preview) */}
-//         <div className="chart-placeholder"></div>
+//         {/* --- REPLACED: This is now a preview table --- */}
+//         <div className="dashboard-preview-table-container">
+//           <table>
+//             <thead>
+//               <tr>
+//                 <th>ID</th>
+//                 <th>Name</th>
+//                 <th>Status</th>
+//                 <th>Value</th>
+//               </tr>
+//             </thead>
+//             <tbody>
+//               {tableData.map((row) => (
+//                 <tr key={row.id}>
+//                   <td>{row.id}</td>
+//                   <td>{row.name}</td>
+//                   <td>{row.status}</td>
+//                   <td>{row.value.toLocaleString()}</td>
+//                 </tr>
+//               ))}
+//             </tbody>
+//           </table>
+//         </div>
 //       </section>
 
-//       {/* --- Bottom Row Content --- */}
+//       {/* --- SECTION 3: Bottom Row Content --- */}
 //       <section className="bottom-content">
-//         {/* (The rest of this component remains the same) */}
-        
-//         {/* Excel Upload Panel */}
-//         <div className="content-panel excel-upload">
-//           <h2>Excel Integration & Upload</h2>
-//           {/* ... */}
+//         <div className="content-panel upload-chart-panel">
+//           <UploadChart />
 //         </div>
-
-//         {/* Recent Import List */}
 //         <div className="content-panel import-list">
 //           <h2>Recent Import List of Data</h2>
 //           <table>
-//             {/* ... */}
+//             {/* ... table content ... */}
 //           </table>
 //         </div>
 //       </section>
@@ -72,17 +109,42 @@
 import React from 'react';
 import Card from './Card.jsx';
 import { Link } from 'react-router-dom';
-import { importData, overviewSummaryData } from '../data/mockData.js';
-import UploadChart from './UploadChart.jsx'; // The new bar chart
+import { 
+  importData, // <-- Makes sure this is imported
+  overviewSummaryData,
+  wirelessPreviewData,
+  transportPreviewData,
+  wirelinePreviewData,
+  totalPreviewData
+} from '../data/mockData.js';
+import UploadChart from './UploadChart.jsx';
 
+// --- Function to get data for the preview table ---
+const getPreviewTableData = (previewCategory) => {
+  switch (previewCategory) {
+    case 'wireless':
+      return wirelessPreviewData;
+    case 'transport':
+      return transportPreviewData;
+    case 'wireline':
+      return wirelinePreviewData;
+    case 'total no. of data': // Make sure this matches the card title
+      return totalPreviewData;
+    default:
+      return wirelessPreviewData;
+  }
+};
+
+// --- Your DashboardContent Component ---
 function DashboardContent({ activePreview, onCardClick }) {
   
   const summaryData = overviewSummaryData; 
   const chartTitle = `Preview of ${activePreview} Data`;
+  const tableData = getPreviewTableData(activePreview); 
 
   return (
     <>
-      {/* --- SECTION 1: Summary Cards (This was missing) --- */}
+      {/* --- SECTION 1: Summary Cards --- */}
       <section className="summary-cards">
         {summaryData.map((data) => (
           <Card
@@ -96,31 +158,52 @@ function DashboardContent({ activePreview, onCardClick }) {
         ))}
       </section>
 
-      {/* --- SECTION 2: Main Chart (This was missing) --- */}
+      {/* --- SECTION 2: Main Data Preview --- */}
       <section className="chart-container">
         
         <div className="chart-header">
           <h2>{chartTitle}</h2>
           <Link 
-            to={`/data/${activePreview}`} 
+            to={`/dashboard/data/${activePreview === 'total no. of data' ? 'total' : activePreview}`}
             className="view-all-btn btn btn-secondary"
           >
             View All
           </Link>
         </div>
         
-        <div className="chart-placeholder"></div>
+        <div className="dashboard-preview-table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Status</th>
+                <th>Value</th>
+              </tr>
+            </thead>
+            <tbody>
+              {tableData.map((row) => (
+                <tr key={row.id}>
+                  <td>{row.id}</td>
+                  <td>{row.name}</td>
+                  <td>{row.status}</td>
+                  <td>{row.value.toLocaleString()}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </section>
 
       {/* --- SECTION 3: Bottom Row Content --- */}
       <section className="bottom-content">
         
-        {/* Panel 1: The new Bar Chart */}
+        {/* Panel 1: Bar Chart */}
         <div className="content-panel upload-chart-panel">
           <UploadChart />
         </div>
-
-        {/* Panel 2: The Import List */}
+        
+        {/* Panel 2: Recent Import List (FIXED) */}
         <div className="content-panel import-list">
           <h2>Recent Import List of Data</h2>
           <table>
@@ -131,6 +214,7 @@ function DashboardContent({ activePreview, onCardClick }) {
                 <th>Status</th>
               </tr>
             </thead>
+            {/* --- THIS IS THE CODE THAT WAS MISSING --- */}
             <tbody>
               {importData.map((item, index) => (
                 <tr key={index}>
@@ -140,6 +224,7 @@ function DashboardContent({ activePreview, onCardClick }) {
                 </tr>
               ))}
             </tbody>
+            {/* --- END OF FIX --- */}
           </table>
         </div>
       </section>

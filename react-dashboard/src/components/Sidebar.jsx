@@ -1,23 +1,24 @@
-// import React from 'react';
+// import React, { useState } from 'react'; // <-- Import useState
 // import { Link, useLocation } from 'react-router-dom';
 
 // function Sidebar() {
-//   const location = useLocation(); // This hook gets the current URL
+//   const location = useLocation(); 
 //   const pathname = location.pathname;
+//   const [isDropdownOpen, setIsDropdownOpen] = useState(false); // <-- Add state
 
 //   const navItems = [
-//     { name: 'Dashboard', icon: '📊', path: '/' },
-//     { name: 'Data Import', icon: '📥', path: '/import' },
-//     { name: 'Settings', icon: '⚙️', path: '/settings' }, // This link won't go anywhere yet
+//     { name: 'Dashboard', icon: '📊', path: '/dashboard' },
+//     { name: 'Data Import', icon: '📥', path: '/dashboard/import' },
 //   ];
 
 //   return (
 //     <aside className="sidebar">
-//       <nav>
+      
+//       {/* --- Navigation Links --- */}
+//       <nav className="sidebar-nav-main">
 //         <ul className="sidebar-nav">
 //           {navItems.map((item) => (
 //             <li key={item.name}>
-//               {/* Use <Link> instead of <a> for client-side routing */}
 //               <Link
 //                 to={item.path}
 //                 className={pathname === item.path ? 'active' : ''}
@@ -29,23 +30,61 @@
 //           ))}
 //         </ul>
 //       </nav>
+
+//       {/* --- User Profile Section Wrapper --- */}
+//       <div className="sidebar-profile-container"> {/* New wrapper */}
+
+//         {/* --- NEW: Profile Dropdown --- */}
+//         {isDropdownOpen && (
+//           <div className="profile-dropdown">
+//             <Link to="#" className="profile-dropdown-item">
+//               <span className="material-icons">person</span>
+//               Profile
+//             </Link>
+//             <Link to="/" className="profile-dropdown-item logout">
+//               <span className="material-icons">logout</span>
+//               Logout
+//             </Link>
+//           </div>
+//         )}
+//         {/* --- End of Dropdown --- */}
+
+//         {/* --- Profile Clickable Area --- */}
+//         <div 
+//           className="sidebar-profile" 
+//           onClick={() => setIsDropdownOpen(!isDropdownOpen)} // Toggle on click
+//         >
+//           <div className="profile-avatar">
+//             <span className="profile-initials">F</span>
+//           </div>
+//           <div className="profile-info">
+//             <span className="profile-name">Fernandez</span>
+//           </div>
+//           {/* Icon now rotates */}
+//           <span className={`profile-dropdown-icon ${isDropdownOpen ? 'open' : ''}`}>
+//             expand_more
+//           </span>
+//         </div>
+//       </div>
 //     </aside>
 //   );
 // }
 
 // export default Sidebar;
 
-import React from 'react';
+
+import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 
 function Sidebar() {
   const location = useLocation(); 
   const pathname = location.pathname;
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false); // State
 
   const navItems = [
-    { name: 'Dashboard', icon: '📊', path: '/' },
-    { name: 'Data Import', icon: '📥', path: '/import' },
-    { name: 'Settings', icon: '⚙️', path: '/settings' },
+    { name: 'Dashboard', icon: '📊', path: '/dashboard' },
+    { name: 'Data Import', icon: '📥', path: '/dashboard/import' },
+    //{ name: 'Users', icon: 'groups', path: '/dashboard/users' }, // <-- ADD THIS LINE
   ];
 
   return (
@@ -68,19 +107,41 @@ function Sidebar() {
         </ul>
       </nav>
 
-      {/* --- NEW: User Profile Section --- */}
-      <div className="sidebar-profile">
-        <div className="profile-avatar">
-          {/* You can replace this with an <img> tag */}
-          <span className="profile-initials">F</span>
-        </div>
-        <div className="profile-info">
-          <span className="profile-name">Fernandez</span>
-        </div>
-        <span className="profile-dropdown-icon">expand_more</span>
-      </div>
-      {/* --- End of User Profile Section --- */}
+      {/* --- User Profile Section Wrapper --- */}
+      <div className="sidebar-profile-container">
 
+        {/* --- Profile Clickable Area --- */}
+        <div 
+          className="sidebar-profile" 
+          onClick={() => setIsDropdownOpen(!isDropdownOpen)} // Toggle on click
+        >
+          <div className="profile-avatar">
+            <span className="profile-initials">F</span>
+          </div>
+          <div className="profile-info">
+            <span className="profile-name">Fernandez</span>
+          </div>
+          {/* Icon now rotates */}
+          <span className={`profile-dropdown-icon ${isDropdownOpen ? 'open' : ''}`}>
+            expand_more
+          </span>
+        </div>
+
+        {/* --- Profile Dropdown (Now placed *after* the bar) --- */}
+        <div className={`profile-dropdown ${isDropdownOpen ? 'open' : ''}`}> 
+          <Link to="#" className="profile-dropdown-item">
+            {/* Using Google Icons, which are built-in */}
+            <span className="material-icons">person</span>
+            Profile
+          </Link>
+          <Link to="/" className="profile-dropdown-item logout">
+            <span className="material-icons">logout</span>
+            Logout
+          </Link>
+        </div>
+        {/* --- End of Dropdown --- */}
+        
+      </div>
     </aside>
   );
 }
