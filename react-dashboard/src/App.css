@@ -873,3 +873,372 @@ body {
   background-color: #cbd5e0; /* Keep the same color on hover */
 }
 
+/* ============================================
+--- 6. USERS PAGE STYLES (Updates) ---
+============================================
+*/
+.users-page-layout .users-page-header {
+  display: flex; /* Use flexbox to align heading and button */
+  justify-content: space-between; /* Push items to opposite ends */
+  align-items: center; /* Vertically center items */
+  padding-bottom: 15px;
+  border-bottom: 1px solid #e8e8e8;
+}
+
+.users-page-layout .users-page-header h2 {
+  margin: 0; /* Remove default margin */
+}
+
+.add-user-btn {
+  /* Button already has base styles */
+  padding: 8px 15px; /* Adjust padding if needed */
+}
+
+.users-table-container {
+  margin-top: 20px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  overflow: hidden; 
+  overflow-y: auto; 
+}
+
+.users-table-container table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.users-table-container th,
+.users-table-container td {
+  padding: 12px 15px;
+  text-align: left;
+  border-bottom: 1px solid #e8e8e8;
+  font-size: 0.9em;
+}
+
+.users-table-container th {
+  background-color: #f7fafc;
+  font-weight: 600;
+  color: #4a5568;
+  position: sticky;
+  top: 0;
+}
+
+.users-table-container td {
+  color: #2d3748;
+}
+
+.users-table-container tr:nth-child(even) {
+  background-color: #fdfdfd;
+}
+
+.users-table-container tr:last-child td {
+  border-bottom: none;
+}
+
+/* ============================================
+--- 7. ADD USER PAGE STYLES ---
+============================================
+*/
+.add-user-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  background-color: #ffffff; /* Give it a white background like content panels */
+  padding: 30px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+  border: 1px solid #e8e8e8;
+  max-width: 700px; /* Limit the width of the form */
+  margin: 0 auto; /* Center the form horizontally */
+}
+
+.add-user-layout h2 {
+  margin-top: 0;
+  padding-bottom: 15px;
+  border-bottom: 1px solid #e8e8e8;
+  text-align: center;
+  color: #2d3748;
+}
+
+.add-user-form {
+  /* Inherits styles from .login-form */
+  gap: 15px; /* Slightly reduce gap */
+}
+
+.add-user-form select {
+  /* Basic styling for the select dropdown */
+  width: 100%;
+  padding: 12px 15px;
+  font-size: 1em;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  box-sizing: border-box; 
+  transition: all 0.2s ease;
+  background-color: white; /* Ensure background is white */
+  appearance: none; /* Remove default arrow in some browsers */
+  background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23007CB2%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E');
+  background-repeat: no-repeat;
+  background-position: right 15px top 50%;
+  background-size: .65em auto;
+}
+
+.add-user-form select:focus {
+  outline: none;
+  border-color: #0e90b8; /* Globe blue */
+  box-shadow: 0 0 0 3px rgba(14, 144, 184, 0.2); /* Globe blue glow */
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end; /* Align buttons to the right */
+  gap: 10px;
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid #e8e8e8;
+}
+
+/* ============================================
+--- 6. USERS PAGE STYLES (Button Move) ---
+============================================
+*/
+
+/* --- Remove flexbox from the main page header --- */
+.users-page-layout .users-page-header {
+  /* Ensure NO display:flex here */
+  padding-bottom: 15px;
+  border-bottom: 1px solid #e8e8e8;
+}
+
+/* --- Style for the container holding h3 and button --- */
+.current-users-header {
+  display: flex;                  /* Lays out items in a row */
+  justify-content: space-between; /* Pushes h3 left, button right */
+  align-items: center;            /* Vertically aligns them */
+  margin-bottom: 20px;            /* Space below this header */
+}
+
+.current-users-header h3 {
+  margin: 0; /* Remove default margin from h3 */
+}
+
+.current-users-header .add-user-btn {
+  padding: 8px 15px; 
+}
+
+/* --- Styles for the table (should already exist) --- */
+.users-table-container {
+  margin-top: 20px; /* Adjust if needed, but not related to button */
+  /* ... other table styles ... */
+}
+
+/* ============================================
+--- 7. IMPORT MODAL STYLES ---
+============================================
+*/
+
+.modal-overlay {
+  position: fixed; /* Sit on top of everything */
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000; /* Ensure it's above other content */
+}
+
+.modal-content {
+  background-color: #ffffff;
+  padding: 25px;
+  border-radius: 10px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+  width: 90%;
+  max-width: 500px; /* Limit modal width */
+  display: flex;
+  flex-direction: column;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #e8e8e8;
+  padding-bottom: 15px;
+  margin-bottom: 20px;
+}
+
+.modal-header h2 {
+  margin: 0;
+  font-size: 1.4em;
+  color: #2d3748;
+}
+
+.modal-close-btn {
+  background: none;
+  border: none;
+  font-size: 1.8em;
+  cursor: pointer;
+  color: #718096;
+  padding: 0 5px;
+}
+.modal-close-btn:hover {
+  color: #2d3748;
+}
+
+.modal-body {
+  margin-bottom: 25px;
+  text-align: center; /* Center the button and text */
+}
+
+.select-file-modal-btn {
+  /* Inherits .btn .btn-secondary styles */
+  margin-bottom: 15px;
+}
+
+.selected-file-name {
+  font-size: 0.9em;
+  color: #4a5568;
+  margin-top: 10px;
+  font-style: italic;
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: flex-end; /* Align buttons to the right */
+  gap: 10px;
+  border-top: 1px solid #e8e8e8;
+  padding-top: 20px;
+}
+
+/* ============================================
+--- 8. DATA IMPORT PAGE (Modal Updates) ---
+============================================
+*/
+
+/* --- Preview Header --- */
+.data-preview-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #e8e8e8;
+  padding-bottom: 10px;
+  /* Remove margin from h2 inside this specific header */
+  margin-bottom: 0;
+}
+.data-preview-header h2 {
+  margin: 0;
+}
+
+.clear-preview-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #718096;
+  padding: 5px;
+  display: flex; /* Helps align the icon */
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+.clear-preview-btn:hover {
+  background-color: #fce8e8; /* Light red background */
+  color: #e53e3e; /* Red color */
+}
+.clear-preview-btn .material-icons {
+  font-size: 20px; /* Adjust icon size */
+}
+
+/* --- Table Checkboxes --- */
+.data-preview-table-container th:first-child,
+.data-preview-table-container td:first-child {
+  width: 50px; /* Give checkbox column a fixed width */
+  text-align: center;
+}
+
+.data-preview-table-container input[type="checkbox"] {
+  cursor: pointer;
+  width: 16px;
+  height: 16px;
+}
+
+/* --- Action Buttons - Make single button full width --- */
+.action-buttons {
+  /* Keep display: flex */
+}
+.action-buttons .btn {
+  /* Keep width: 100% */
+}
+
+/* --- Adjust side panel styling if needed --- */
+.side-panel {
+  /* Keep existing styles */
+}
+
+.statistics-container {
+  /* Keep existing styles */
+}
+
+/* ============================================
+--- DATA IMPORT PAGE (Icon Button Updates) ---
+============================================
+*/
+
+/* --- Preview Header --- */
+.data-preview-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #e8e8e8;
+  padding-bottom: 10px;
+  margin-bottom: 0; /* Align with h2 removal */
+}
+.data-preview-header h2 {
+  margin: 0;
+}
+
+/* Container to group buttons */
+.preview-header-buttons {
+  display: flex;
+  align-items: center;
+  gap: 10px; /* Space between buttons */
+}
+
+/* --- Generic Icon Button Style (Shared by Clear and Delete) --- */
+.icon-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #718096; /* Default icon color */
+  padding: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.icon-btn .material-icons {
+  font-size: 20px; /* Consistent icon size */
+}
+
+/* --- Clear Preview Button (Trash Icon) --- */
+.clear-preview-btn {
+  /* Inherits .icon-btn styles */
+}
+.clear-preview-btn:hover {
+  background-color: #f0f2f5; /* Light grey background */
+  color: #4a5568; /* Darker grey */
+}
+
+/* --- Delete Rows Button (Red Trash/Delete Icon) --- */
+.delete-rows-btn {
+  /* Inherits .icon-btn styles */
+  color: #e53e3e; /* Red color */
+}
+.delete-rows-btn:hover {
+  background-color: #fce8e8; /* Light red background */
+  color: #c53030; /* Darker red */
+}

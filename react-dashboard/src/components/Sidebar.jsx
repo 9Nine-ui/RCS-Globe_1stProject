@@ -84,7 +84,7 @@ function Sidebar() {
   const navItems = [
     { name: 'Dashboard', icon: '📊', path: '/dashboard' },
     { name: 'Data Import', icon: '📥', path: '/dashboard/import' },
-    //{ name: 'Users', icon: 'groups', path: '/dashboard/users' }, // <-- ADD THIS LINE
+    { name: 'Users', icon: '👤', path: '/dashboard/users' }, // <-- ADD THIS LINE
   ];
 
   return (
@@ -116,10 +116,10 @@ function Sidebar() {
           onClick={() => setIsDropdownOpen(!isDropdownOpen)} // Toggle on click
         >
           <div className="profile-avatar">
-            <span className="profile-initials">F</span>
+            <span className="profile-initials">T</span>
           </div>
           <div className="profile-info">
-            <span className="profile-name">Fernandez</span>
+            <span className="profile-name">Tester</span>
           </div>
           {/* Icon now rotates */}
           <span className={`profile-dropdown-icon ${isDropdownOpen ? 'open' : ''}`}>

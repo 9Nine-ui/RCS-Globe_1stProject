@@ -1,13 +1,12 @@
-// import React from 'react'; // Removed useState
-
-// // --- Import Chart.js components ---
+// import React, { useState, useRef } from 'react';
+// import ImportModal from '../components/ImportModal.jsx';
 // import { Pie } from 'react-chartjs-2';
 // import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
 
-// // --- Register the components for the Pie chart ---
+// // --- Register Chart.js components ---
 // ChartJS.register(ArcElement, Tooltip, Legend);
 
-// // --- Mock data for the pie chart (Export data removed) ---
+// // --- Mock data for the pie chart ---
 // const importChartData = {
 //   labels: ['Completed', 'Failed', 'Pending'],
 //   datasets: [
@@ -38,23 +37,80 @@
 //   { id: '1005', category: 'Transport', value: 12000, date: '2025-10-22' },
 // ];
 
-// // --- This is your Data Import Page Component ---
+// // --- Data Import Page Component ---
 // function DataImportPage() {
-//   // The [chartView] state has been removed
+//   const [isModalOpen, setIsModalOpen] = useState(false);
+//   const [currentPreviewFile, setCurrentPreviewFile] = useState(null);
+
+//   // Function to open the modal
+//   const handleOpenModal = () => {
+//     setIsModalOpen(true);
+//   };
+
+//   // Function to handle the import confirmation from the modal
+//   const handleImportConfirm = (file) => {
+//     setCurrentPreviewFile(file);
+//     alert(`File selected for preview: ${file.name}`);
+//   };
+
+//   // Function for the trash icon (clear preview)
+//   const handleClearPreview = () => {
+//     setCurrentPreviewFile(null);
+//     alert('Preview cleared!');
+//   };
+
+//   // Function for the delete icon (delete selected rows)
+//   const handleDeleteSelected = () => {
+//     alert('Delete Selected Rows clicked!');
+//     // Add logic here to determine which rows are checked and delete them
+//   };
 
 //   return (
 //     <div className="data-import-layout">
+//       {/* --- Import Modal --- */}
+//       <ImportModal
+//         isOpen={isModalOpen}
+//         onClose={() => setIsModalOpen(false)}
+//         onImportConfirm={handleImportConfirm}
+//       />
+
+//       {/* --- Content Wrapper --- */}
 //       <div className="content-wrapper">
-        
-//         {/* This is the large main panel on the left */}
+
+//         {/* --- Main Panel --- */}
 //         <section className="main-panel">
-//           <h2>Data Preview</h2>
-//           <p>When you upload an Excel file, a preview will be shown here before you import it.</p>
-          
+//           {/* --- Header for Data Preview --- */}
+//           <div className="data-preview-header">
+//             <h2>Data Preview</h2>
+//             {/* --- Container for Buttons --- */}
+//             <div className="preview-header-buttons">
+//               {/* Trash icon only shows if there's data to clear */}
+//               {currentPreviewFile && (
+//                 <button className="clear-preview-btn icon-btn" onClick={handleClearPreview} title="Clear Preview">
+//                   <span className="material-icons">delete_outline</span>
+//                 </button>
+//               )}
+//               {/* --- DELETE ICON BUTTON --- */}
+//               {currentPreviewFile && ( // Only show if there's a preview
+//                  <button className="delete-rows-btn icon-btn" onClick={handleDeleteSelected} title="Delete Selected Rows">
+//                    <span className="material-icons">delete</span>
+//                  </button>
+//               )}
+//               {/* --- END DELETE BUTTON --- */}
+//             </div>
+//           </div>
+//           <p>
+//             {currentPreviewFile
+//               ? `Previewing: ${currentPreviewFile.name}`
+//               : 'Import an Excel file to see a preview.'}
+//           </p>
+
+//           {/* --- Preview Table --- */}
 //           <div className="data-preview-table-container">
 //             <table>
 //               <thead>
 //                 <tr>
+//                   <th><input type="checkbox" /></th>
 //                   <th>ID</th>
 //                   <th>Category</th>
 //                   <th>Value</th>
@@ -64,6 +120,7 @@
 //               <tbody>
 //                 {previewTableData.map((row) => (
 //                   <tr key={row.id}>
+//                     <td><input type="checkbox" /></td>
 //                     <td>{row.id}</td>
 //                     <td>{row.category}</td>
 //                     <td>{row.value.toLocaleString()}</td>
@@ -74,37 +131,36 @@
 //             </table>
 //           </div>
 //         </section>
-        
-//         {/* This is the smaller panel on the right */}
+
+//         {/* --- Side Panel --- */}
 //         <aside className="side-panel">
-          
-//           {/* --- MODIFIED: Import Action Button (Export removed) --- */}
+//           {/* --- Import Button --- */}
 //           <div className="action-buttons">
-//             <button className="btn btn-primary">Upload & Import</button>
+//             <button
+//               className="btn btn-primary"
+//               onClick={handleOpenModal}
+//             >
+//               Import Data
+//             </button>
 //           </div>
 
-//           {/* --- MODIFIED: Statistics Section --- */}
+//           {/* --- Statistics Section --- */}
 //           <div className="statistics-container">
 //             <h3>Import Statistics</h3>
-            
-//             {/* The chart-toggle div has been removed */}
-            
-//             {/* --- MODIFIED: Pie Chart --- */}
 //             <div className="chart-wrapper">
-//               <Pie 
-//                 data={importChartData} // Data is no longer conditional
-//                 options={{ 
-//                   responsive: true, 
+//               <Pie
+//                 data={importChartData}
+//                 options={{
+//                   responsive: true,
 //                   maintainAspectRatio: false,
 //                   plugins: {
 //                     legend: {
-//                       position: 'left', // <-- MOVES LEGEND TO THE LEFT
+//                       position: 'left',
 //                     },
 //                   },
 //                 }}
 //               />
 //             </div>
-
 //           </div>
 //         </aside>
 
@@ -115,12 +171,14 @@
 
 // export default DataImportPage;
 
-
-import React, { useState, useRef } from 'react'; // <-- Import useState and useRef
+import React, { useState } from 'react';
+import ImportModal from '../components/ImportModal.jsx';
 import { Pie } from 'react-chartjs-2';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
 
-// --- Register the components for the Pie chart ---
+// ...existing code...
+
+// --- Register Chart.js components ---
 ChartJS.register(ArcElement, Tooltip, Legend);
 
 // --- Mock data for the pie chart ---
@@ -154,55 +212,79 @@ const previewTableData = [
   { id: '1005', category: 'Transport', value: 12000, date: '2025-10-22' },
 ];
 
-// --- This is your Data Import Page Component ---
+// --- Data Import Page Component ---
 function DataImportPage() {
-  // --- NEW: State for file and file input ref ---
-  const [selectedFile, setSelectedFile] = useState(null);
-  const fileInputRef = useRef(null); // Reference to the hidden file input
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [currentPreviewFile, setCurrentPreviewFile] = useState(null);
 
-  // This function is triggered by the hidden file input
-  const handleFileChange = (event) => {
-    if (event.target.files && event.target.files[0]) {
-      const file = event.target.files[0];
-      setSelectedFile(file);
-      // In a real app, you would now parse the Excel file here
-      // and update the preview table data.
-    }
+  const handleOpenModal = () => setIsModalOpen(true);
+
+  const handleImportConfirm = (file) => {
+    setCurrentPreviewFile(file);
+    // Replace alerts with app notifications as needed
+    alert(`File selected for preview: ${file.name}`);
+    setIsModalOpen(false);
   };
 
-  // This function is triggered by the "Select File" button
-  const handleSelectFileClick = () => {
-    // Clicks the hidden file input
-    fileInputRef.current.click();
+  const handleClearPreview = () => {
+    setCurrentPreviewFile(null);
+    alert('Preview cleared!');
   };
 
-  // This function is triggered by the "Import" button
-  const handleImportClick = () => {
-    // Add your import logic here
-    alert(`Importing file: ${selectedFile.name}`);
-    // After import, reset the file state
-    setSelectedFile(null);
-    // You might also want to clear the preview table data
+  const handleDeleteSelected = () => {
+    // Wire up actual delete logic when row-selection state exists.
+    alert('Delete Selected Rows clicked!');
   };
 
   return (
     <div className="data-import-layout">
+      <ImportModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onImportConfirm={handleImportConfirm}
+      />
+
       <div className="content-wrapper">
-        
-        {/* This is the large main panel on the left */}
         <section className="main-panel">
-          <h2>Data Preview</h2>
+          <div className="data-preview-header">
+            <h2>Data Preview</h2>
+
+            <div className="preview-header-buttons">
+              {/* Clear preview (only when a file is loaded) */}
+              {currentPreviewFile && (
+                <button
+                  className="clear-preview-btn icon-btn"
+                  onClick={handleClearPreview}
+                  title="Clear Preview"
+                >
+                  <span className="material-icons">delete_outline</span>
+                </button>
+              )}
+
+              {/* Delete rows (visible when there are rows to delete) */}
+              {previewTableData.length > 0 && (
+                <button
+                  className="delete-rows-btn icon-btn"
+                  onClick={handleDeleteSelected}
+                  title="Delete Selected Rows"
+                >
+                  <span className="material-icons">delete</span>
+                </button>
+              )}
+            </div>
+          </div>
+
           <p>
-            {selectedFile
-              ? `Previewing: ${selectedFile.name}` // Show file name
-              : 'Select an Excel file to see a preview.' // Default text
-            }
+            {currentPreviewFile
+              ? `Previewing: ${currentPreviewFile.name}`
+              : 'Import an Excel file to see a preview.'}
           </p>
-          
+
           <div className="data-preview-table-container">
             <table>
               <thead>
                 <tr>
+                  <th><input type="checkbox" aria-label="select all" /></th>
                   <th>ID</th>
                   <th>Category</th>
                   <th>Value</th>
@@ -210,9 +292,9 @@ function DataImportPage() {
                 </tr>
               </thead>
               <tbody>
-                {/* In a real app, this data would update based on the selectedFile */}
                 {previewTableData.map((row) => (
                   <tr key={row.id}>
+                    <td><input type="checkbox" aria-label={`select ${row.id}`} /></td>
                     <td>{row.id}</td>
                     <td>{row.category}</td>
                     <td>{row.value.toLocaleString()}</td>
@@ -223,62 +305,33 @@ function DataImportPage() {
             </table>
           </div>
         </section>
-        
-        {/* This is the smaller panel on the right */}
+
         <aside className="side-panel">
-          
-          {/* --- MODIFIED: Action Buttons --- */}
           <div className="action-buttons">
-            {/* This is the hidden file input */}
-            <input 
-              type="file"
-              ref={fileInputRef}
-              onChange={handleFileChange}
-              style={{ display: 'none' }}
-              accept=".xls, .xlsx" // Optional: only accept Excel files
-            />
-            
-            {/* This button triggers the hidden input */}
-            <button 
-              className="btn btn-secondary" // Styled as secondary
-              onClick={handleSelectFileClick}
-            >
-              Select File
-            </button>
-            
-            {/* This button is disabled until a file is selected */}
-            <button 
-              className="btn btn-primary" // Styled as primary
-              onClick={handleImportClick}
-              disabled={!selectedFile} // Button is disabled if no file
-            >
+            <button className="btn btn-primary" onClick={handleOpenModal}>
               Import Data
             </button>
           </div>
 
-          {/* --- Statistics Section (No Changes) --- */}
           <div className="statistics-container">
             <h3>Import Statistics</h3>
-            <div className="chart-wrapper">
-              <Pie 
+            <div className="chart-wrapper" style={{ height: 200 }}>
+              <Pie
                 data={importChartData}
-                options={{ 
-                  responsive: true, 
+                options={{
+                  responsive: true,
                   maintainAspectRatio: false,
-                  plugins: {
-                    legend: {
-                      position: 'left',
-                    },
-                  },
+                  plugins: { legend: { position: 'left' } },
                 }}
               />
             </div>
           </div>
         </aside>
-
       </div>
     </div>
   );
 }
 
 export default DataImportPage;
+
+// ...existing code...

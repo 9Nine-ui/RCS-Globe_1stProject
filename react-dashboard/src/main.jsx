@@ -51,7 +51,8 @@ import DashboardPage from './pages/DashboardPage.jsx';
 import DataImportPage from './pages/DataImportPage.jsx';
 import DataGridPage from './pages/DataGridPage.jsx';
 import LoginPage from './pages/LoginPage.jsx'; // <-- IMPORT THE NEW LOGIN PAGE
-//import UsersPage from './pages/UsersPage.jsx';
+import UsersPage from './pages/UsersPage.jsx';
+import AddUserPage from './pages/AddUserPage.jsx'; // <-- IMPORT THE NEW PAGE
 
 // 2. Define your new routes
 const router = createBrowserRouter([
@@ -75,10 +76,13 @@ const router = createBrowserRouter([
         path: 'data/:category', // Will be /dashboard/data/...
         element: <DataGridPage />,
       },
-      // { 
-      //   path: 'users', 
-      //   element: <UsersPage />, // <-- USE THE IMPORTED PAGE
-      // },
+      { 
+        path: 'users', 
+        element: <UsersPage />, // <-- USE THE IMPORTED PAGE
+      },
+      { path: 'users/add', 
+        element: <AddUserPage /> 
+      },
     ],
   },
 ]);
