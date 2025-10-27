@@ -39,7 +39,7 @@ export const dashboardTabs = [
   { id: 'wireless', name: 'Wireless' },
   { id: 'transport', name: 'Transport' },
   { id: 'wireline', name: 'Wireline' },
-  { id: 'total', name: 'Total no of data' },
+  { id: 'data', name: 'All Data' },
 ];
 
 // --- 4. Function for Data Grid Page (Currently NOT USED, but good to keep) ---

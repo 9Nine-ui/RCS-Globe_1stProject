@@ -301,8 +301,8 @@ body {
 
 .form-group input:focus {
     outline: none;
-    border-color: #0e90b8; /* Globe primary blue */
-    box-shadow: 0 0 0 3px rgba(14, 144, 184, 0.2); /* Globe blue glow */
+    border-color: #0e90b8; 
+    box-shadow: 0 0 0 3px rgba(14, 144, 184, 0.2); 
 }
 
 .login-btn {
@@ -317,12 +317,7 @@ body {
     background-color: #3ea6c6; /* Lighter Globe blue for hover */
 }
 
-/* ============================================
---- 3. DASHBOARD PAGE STYLES ---
-============================================
-*/
 
-/* --- Summary Cards --- */
 .summary-cards {
     display: grid;
     grid-template-columns: repeat(4, 1fr);

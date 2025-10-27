@@ -1,0 +1,30 @@
+CREATE DATABASE IF NOT EXISTS rsc_globe_db;
+USE rsc_globe_db;
+
+CREATE TABLE IF NOT EXISTS users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(255) NOT NULL,
+    email VARCHAR(255) NOT NULL UNIQUE,
+    role VARCHAR(50),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS data_imports (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    file_name VARCHAR(255) NOT NULL,
+    import_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    status VARCHAR(50),
+    data_type VARCHAR(100),
+    imported_by INT,
+    FOREIGN KEY (imported_by) REFERENCES users(id)
+);
+
+CREATE TABLE IF NOT EXISTS chart_data (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    chart_type VARCHAR(50),
+    data_values JSON,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    created_by INT,
+    FOREIGN KEY (created_by) REFERENCES users(id)
+);

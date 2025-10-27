@@ -1,243 +1,155 @@
-// import React, { useState, useRef } from 'react';
-// import ImportModal from '../components/ImportModal.jsx';
-// import { Pie } from 'react-chartjs-2';
-// import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
-
-// // --- Register Chart.js components ---
-// ChartJS.register(ArcElement, Tooltip, Legend);
-
-// // --- Mock data for the pie chart ---
-// const importChartData = {
-//   labels: ['Completed', 'Failed', 'Pending'],
-//   datasets: [
-//     {
-//       label: '# of Imports',
-//       data: [122, 15, 30],
-//       backgroundColor: [
-//         'rgba(54, 162, 235, 0.7)', // Blue
-//         'rgba(255, 99, 132, 0.7)', // Red
-//         'rgba(255, 206, 86, 0.7)', // Yellow
-//       ],
-//       borderColor: [
-//         'rgba(54, 162, 235, 1)',
-//         'rgba(255, 99, 132, 1)',
-//         'rgba(255, 206, 86, 1)',
-//       ],
-//       borderWidth: 1,
-//     },
-//   ],
-// };
-
-// // --- Mock data for the preview table ---
-// const previewTableData = [
-//   { id: '1001', category: 'Wireless', value: 85000, date: '2025-10-20' },
-//   { id: '1002', category: 'Transport', value: 32000, date: '2025-10-20' },
-//   { id: '1003', category: 'Wireline', value: 68000, date: '2025-10-21' },
-//   { id: '1004', category: 'Wireless', value: 7500, date: '2025-10-21' },
-//   { id: '1005', category: 'Transport', value: 12000, date: '2025-10-22' },
-// ];
-
-// // --- Data Import Page Component ---
-// function DataImportPage() {
-//   const [isModalOpen, setIsModalOpen] = useState(false);
-//   const [currentPreviewFile, setCurrentPreviewFile] = useState(null);
-
-//   // Function to open the modal
-//   const handleOpenModal = () => {
-//     setIsModalOpen(true);
-//   };
-
-//   // Function to handle the import confirmation from the modal
-//   const handleImportConfirm = (file) => {
-//     setCurrentPreviewFile(file);
-//     alert(`File selected for preview: ${file.name}`);
-//   };
-
-//   // Function for the trash icon (clear preview)
-//   const handleClearPreview = () => {
-//     setCurrentPreviewFile(null);
-//     alert('Preview cleared!');
-//   };
-
-//   // Function for the delete icon (delete selected rows)
-//   const handleDeleteSelected = () => {
-//     alert('Delete Selected Rows clicked!');
-//     // Add logic here to determine which rows are checked and delete them
-//   };
-
-//   return (
-//     <div className="data-import-layout">
-//       {/* --- Import Modal --- */}
-//       <ImportModal
-//         isOpen={isModalOpen}
-//         onClose={() => setIsModalOpen(false)}
-//         onImportConfirm={handleImportConfirm}
-//       />
-
-//       {/* --- Content Wrapper --- */}
-//       <div className="content-wrapper">
-
-//         {/* --- Main Panel --- */}
-//         <section className="main-panel">
-//           {/* --- Header for Data Preview --- */}
-//           <div className="data-preview-header">
-//             <h2>Data Preview</h2>
-//             {/* --- Container for Buttons --- */}
-//             <div className="preview-header-buttons">
-//               {/* Trash icon only shows if there's data to clear */}
-//               {currentPreviewFile && (
-//                 <button className="clear-preview-btn icon-btn" onClick={handleClearPreview} title="Clear Preview">
-//                   <span className="material-icons">delete_outline</span>
-//                 </button>
-//               )}
-//               {/* --- DELETE ICON BUTTON --- */}
-//               {currentPreviewFile && ( // Only show if there's a preview
-//                  <button className="delete-rows-btn icon-btn" onClick={handleDeleteSelected} title="Delete Selected Rows">
-//                    <span className="material-icons">delete</span>
-//                  </button>
-//               )}
-//               {/* --- END DELETE BUTTON --- */}
-//             </div>
-//           </div>
-//           <p>
-//             {currentPreviewFile
-//               ? `Previewing: ${currentPreviewFile.name}`
-//               : 'Import an Excel file to see a preview.'}
-//           </p>
-
-//           {/* --- Preview Table --- */}
-//           <div className="data-preview-table-container">
-//             <table>
-//               <thead>
-//                 <tr>
-//                   <th><input type="checkbox" /></th>
-//                   <th>ID</th>
-//                   <th>Category</th>
-//                   <th>Value</th>
-//                   <th>Date</th>
-//                 </tr>
-//               </thead>
-//               <tbody>
-//                 {previewTableData.map((row) => (
-//                   <tr key={row.id}>
-//                     <td><input type="checkbox" /></td>
-//                     <td>{row.id}</td>
-//                     <td>{row.category}</td>
-//                     <td>{row.value.toLocaleString()}</td>
-//                     <td>{row.date}</td>
-//                   </tr>
-//                 ))}
-//               </tbody>
-//             </table>
-//           </div>
-//         </section>
-
-//         {/* --- Side Panel --- */}
-//         <aside className="side-panel">
-//           {/* --- Import Button --- */}
-//           <div className="action-buttons">
-//             <button
-//               className="btn btn-primary"
-//               onClick={handleOpenModal}
-//             >
-//               Import Data
-//             </button>
-//           </div>
-
-//           {/* --- Statistics Section --- */}
-//           <div className="statistics-container">
-//             <h3>Import Statistics</h3>
-//             <div className="chart-wrapper">
-//               <Pie
-//                 data={importChartData}
-//                 options={{
-//                   responsive: true,
-//                   maintainAspectRatio: false,
-//                   plugins: {
-//                     legend: {
-//                       position: 'left',
-//                     },
-//                   },
-//                 }}
-//               />
-//             </div>
-//           </div>
-//         </aside>
-
-//       </div>
-//     </div>
-//   );
-// }
-
-// export default DataImportPage;
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import ImportModal from '../components/ImportModal.jsx';
 import { Pie } from 'react-chartjs-2';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
 
-// ...existing code...
-
 // --- Register Chart.js components ---
 ChartJS.register(ArcElement, Tooltip, Legend);
 
-// --- Mock data for the pie chart ---
-const importChartData = {
-  labels: ['Completed', 'Failed', 'Pending'],
-  datasets: [
-    {
-      label: '# of Imports',
-      data: [122, 15, 30],
-      backgroundColor: [
-        'rgba(54, 162, 235, 0.7)', // Blue
-        'rgba(255, 99, 132, 0.7)', // Red
-        'rgba(255, 206, 86, 0.7)', // Yellow
-      ],
-      borderColor: [
-        'rgba(54, 162, 235, 1)',
-        'rgba(255, 99, 132, 1)',
-        'rgba(255, 206, 86, 1)',
-      ],
-      borderWidth: 1,
-    },
-  ],
-};
-
-// --- Mock data for the preview table ---
-const previewTableData = [
-  { id: '1001', category: 'Wireless', value: 85000, date: '2025-10-20' },
-  { id: '1002', category: 'Transport', value: 32000, date: '2025-10-20' },
-  { id: '1003', category: 'Wireline', value: 68000, date: '2025-10-21' },
-  { id: '1004', category: 'Wireless', value: 7500, date: '2025-10-21' },
-  { id: '1005', category: 'Transport', value: 12000, date: '2025-10-22' },
-];
-
-// --- Data Import Page Component ---
 function DataImportPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentPreviewFile, setCurrentPreviewFile] = useState(null);
+  const [uploadedData, setUploadedData] = useState([]);
+  const [importStats, setImportStats] = useState({
+    completed: 0,
+    failed: 0,
+    pending: 0,
+  });
 
+  // --- Open Import Modal ---
   const handleOpenModal = () => setIsModalOpen(true);
 
-  const handleImportConfirm = (file) => {
+  // --- Handle File Import Confirmation ---
+  const API_BASE = (import.meta.env && import.meta.env.VITE_API_BASE_URL) || 'http://localhost:5001';
+
+  const handleImportConfirm = async (file) => {
     setCurrentPreviewFile(file);
-    // Replace alerts with app notifications as needed
-    alert(`File selected for preview: ${file.name}`);
     setIsModalOpen(false);
+
+    // Create local pending row immediately
+    const tempId = uploadedData.length + 1;
+    const pendingRow = {
+      id: tempId,
+      file_name: file.name,
+      status: 'Pending',
+      created_at: new Date().toISOString(),
+    };
+    setUploadedData((prev) => [pendingRow, ...prev]);
+
+    // Upload to backend for analysis
+    try {
+      const fd = new FormData();
+      fd.append('file', file);
+      const res = await fetch(`${API_BASE}/upload`, { method: 'POST', body: fd });
+      
+      if (!res.ok) {
+        const errorText = await res.text();
+        console.error('Upload failed:', res.status, errorText);
+        throw new Error(`Upload failed (${res.status}): ${errorText}`);
+      }
+      
+      const body = await res.json();
+      console.log('Upload success:', body);
+
+      // Mark as completed on success
+      setUploadedData((prev) =>
+        prev.map((row) =>
+          row.id === tempId ? { ...row, status: 'Completed' } : row
+        )
+      );
+
+      // Optionally refresh stats from server
+      try {
+        const statsRes = await fetch(`${API_BASE}/stats`);
+        if (statsRes.ok) {
+          const stats = await statsRes.json();
+          setImportStats((curr) => ({
+            ...curr,
+            completed: stats.filesUploaded ?? curr.completed,
+            pending: 0,
+          }));
+        } else {
+          // Fallback: compute from local list
+          const completed = (prev => prev.filter(r => r.status === 'Completed').length)(uploadedData);
+          setImportStats((curr) => ({ ...curr, completed }));
+        }
+      } catch {}
+    } catch (err) {
+      console.error('Upload error:', err);
+      // Mark as failed if upload/analysis errored
+      setUploadedData((prev) =>
+        prev.map((row) =>
+          row.id === tempId ? { ...row, status: 'Failed', error: err.message } : row
+        )
+      );
+      alert(`Upload failed: ${err.message}\n\nMake sure:\n1. Backend server is running on port 5001\n2. MySQL is running and database 'rsc_globe_db' exists`);
+    }
   };
 
+  // --- Clear File Preview ---
   const handleClearPreview = () => {
     setCurrentPreviewFile(null);
     alert('Preview cleared!');
   };
 
+  // --- Delete Selected Rows Placeholder ---
   const handleDeleteSelected = () => {
-    // Wire up actual delete logic when row-selection state exists.
     alert('Delete Selected Rows clicked!');
+  };
+
+  useEffect(() => {
+    // Load persisted upload data from localStorage
+    try {
+      const saved = localStorage.getItem('uploadedData');
+      if (saved) {
+        setUploadedData(JSON.parse(saved));
+      }
+    } catch (err) {
+      console.error('Failed to load saved upload data:', err);
+      setUploadedData([]);
+    }
+  }, []);
+
+  // Keep importStats in sync with uploadedData statuses
+  useEffect(() => {
+    const completed = uploadedData.filter(r => r.status === 'Completed').length;
+    const failed = uploadedData.filter(r => r.status === 'Failed').length;
+    const pending = uploadedData.filter(r => r.status === 'Pending').length;
+    setImportStats({ completed, failed, pending });
+    
+    // Persist to localStorage whenever uploadedData changes
+    try {
+      localStorage.setItem('uploadedData', JSON.stringify(uploadedData));
+    } catch (err) {
+      console.error('Failed to save upload data:', err);
+    }
+  }, [uploadedData]);
+
+  // --- Chart Data ---
+  const importChartData = {
+    labels: ['Completed', 'Failed', 'Pending'],
+    datasets: [
+      {
+        label: '# of Imports',
+        data: [importStats.completed, importStats.failed, importStats.pending],
+        backgroundColor: [
+          'rgba(54, 162, 235, 0.7)',
+          'rgba(255, 99, 132, 0.7)',
+          'rgba(255, 206, 86, 0.7)',
+        ],
+        borderColor: [
+          'rgba(54, 162, 235, 1)',
+          'rgba(255, 99, 132, 1)',
+          'rgba(255, 206, 86, 1)',
+        ],
+        borderWidth: 1,
+      },
+    ],
   };
 
   return (
     <div className="data-import-layout">
+      {/* --- Import Modal --- */}
       <ImportModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
@@ -245,24 +157,13 @@ function DataImportPage() {
       />
 
       <div className="content-wrapper">
+        {/* --- Main Panel --- */}
         <section className="main-panel">
           <div className="data-preview-header">
             <h2>Data Preview</h2>
 
             <div className="preview-header-buttons">
-              {/* Clear preview (only when a file is loaded) */}
-              {currentPreviewFile && (
-                <button
-                  className="clear-preview-btn icon-btn"
-                  onClick={handleClearPreview}
-                  title="Clear Preview"
-                >
-                  <span className="material-icons">delete_outline</span>
-                </button>
-              )}
-
-              {/* Delete rows (visible when there are rows to delete) */}
-              {previewTableData.length > 0 && (
+              {uploadedData.length > 0 && (
                 <button
                   className="delete-rows-btn icon-btn"
                   onClick={handleDeleteSelected}
@@ -284,28 +185,45 @@ function DataImportPage() {
             <table>
               <thead>
                 <tr>
-                  <th><input type="checkbox" aria-label="select all" /></th>
+                  {/* ✅ Show checkbox column only if there’s uploaded data */}
+                  {uploadedData.length > 0 && (
+                    <th>
+                      <input type="checkbox" aria-label="select all" />
+                    </th>
+                  )}
                   <th>ID</th>
-                  <th>Category</th>
-                  <th>Value</th>
-                  <th>Date</th>
+                  <th>File Name</th>
+                  <th>Status</th>
+                  <th>Date Uploaded</th>
                 </tr>
               </thead>
               <tbody>
-                {previewTableData.map((row) => (
-                  <tr key={row.id}>
-                    <td><input type="checkbox" aria-label={`select ${row.id}`} /></td>
-                    <td>{row.id}</td>
-                    <td>{row.category}</td>
-                    <td>{row.value.toLocaleString()}</td>
-                    <td>{row.date}</td>
+                {uploadedData.length === 0 ? (
+                  <tr>
+                    <td colSpan="5" style={{ textAlign: 'center' }}>
+                      No uploaded data available.
+                    </td>
                   </tr>
-                ))}
+                ) : (
+                  uploadedData.map((row) => (
+                    <tr key={row.id}>
+                      {/* ✅ Checkbox only appears when data exists */}
+                      <td>
+                        <input type="checkbox" />
+                      </td>
+                      <td>{row.id}</td>
+                      <td>{row.file_name}</td>
+                      <td>{row.status}</td>
+                      <td>{new Date(row.created_at).toLocaleDateString()}</td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </div>
         </section>
 
+        {/* --- Side Panel --- */}
         <aside className="side-panel">
           <div className="action-buttons">
             <button className="btn btn-primary" onClick={handleOpenModal}>
@@ -333,5 +251,3 @@ function DataImportPage() {
 }
 
 export default DataImportPage;
-
-// ...existing code...

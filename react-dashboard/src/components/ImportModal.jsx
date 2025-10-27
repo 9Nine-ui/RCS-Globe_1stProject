@@ -59,7 +59,7 @@ function ImportModal({ isOpen, onClose, onImportConfirm }) {
             ref={fileInputRef}
             onChange={handleFileChange}
             style={{ display: 'none' }}
-            accept=".xls, .xlsx"
+            accept=".xls, .xlsx, .csv, .txt, .json"
           />
 
           {/* Button to trigger file selection */}

@@ -1,25 +1,3 @@
-// import React from 'react';
-// import { Link } from 'react-router-dom'; // Import Link
-
-// // The 'path' prop is new
-// function Card({ title, value, stats, path }) {
-//   return (
-//     // Wrap the card in a Link component
-//     <Link to={path} className="card-link">
-//       <div className="card">
-//         <h3>{title}</h3>
-//         <p className="value">{value}</p>
-//         <div className={`stats ${stats.trend}`}>
-//           <span className="arrow">{stats.arrow}</span>
-//           <span className="percentage">{stats.percentage}</span>
-//         </div>
-//       </div>
-//     </Link>
-//   );
-// }
-
-// export default Card;
-
 import React from 'react';
 // We no longer need 'Link' from react-router-dom
 
