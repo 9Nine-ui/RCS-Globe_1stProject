@@ -7,7 +7,7 @@ const pool = mysql.createPool({
     host: 'localhost',
     user: 'root',
     password: '',  // default XAMPP password is empty
-    database: 'rcs_globe_db'  // Fixed: was rsc_globe_db, should be rcs_globe_db
+    database: 'rsc_globe_db'  // Correct database name
 }).promise();
 
 export default pool;
