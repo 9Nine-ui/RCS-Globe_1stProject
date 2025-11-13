@@ -1,20 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import ImportModal from '../components/ImportModal.jsx';
-import { Pie } from 'react-chartjs-2';
-import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
-
-// --- Register Chart.js components ---
-ChartJS.register(ArcElement, Tooltip, Legend);
+import LoadingModal from '../components/LoadingModal.jsx';
 
 function DataImportPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentPreviewFile, setCurrentPreviewFile] = useState(null);
   const [uploadedData, setUploadedData] = useState([]);
-  const [importStats, setImportStats] = useState({
-    completed: 0,
-    failed: 0,
-    pending: 0,
-  });
+  const [selectedImports, setSelectedImports] = useState([]);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadingFileName, setUploadingFileName] = useState('');
 
   // --- Open Import Modal ---
   const handleOpenModal = () => setIsModalOpen(true);
@@ -25,6 +19,10 @@ function DataImportPage() {
   const handleImportConfirm = async (file) => {
     setCurrentPreviewFile(file);
     setIsModalOpen(false);
+    
+    // Show loading modal
+    setIsUploading(true);
+    setUploadingFileName(file.name);
 
     // Create local pending row immediately
     const tempId = uploadedData.length + 1;
@@ -58,22 +56,23 @@ function DataImportPage() {
         )
       );
 
-      // Optionally refresh stats from server
+      // Refresh the import list from backend
       try {
-        const statsRes = await fetch(`${API_BASE}/stats`);
-        if (statsRes.ok) {
-          const stats = await statsRes.json();
-          setImportStats((curr) => ({
-            ...curr,
-            completed: stats.filesUploaded ?? curr.completed,
-            pending: 0,
+        const importsRes = await fetch(`${API_BASE}/imports`);
+        if (importsRes.ok) {
+          const imports = await importsRes.json();
+          const mappedImports = imports.map(imp => ({
+            id: imp.id,
+            file_name: imp.file_name,
+            status: imp.status || 'completed',
+            created_at: imp.import_date || imp.created_at
           }));
-        } else {
-          // Fallback: compute from local list
-          const completed = (prev => prev.filter(r => r.status === 'Completed').length)(uploadedData);
-          setImportStats((curr) => ({ ...curr, completed }));
+          setUploadedData(mappedImports);
         }
-      } catch {}
+      } catch (refreshErr) {
+        console.error('Failed to refresh import list:', refreshErr);
+      }
+
     } catch (err) {
       console.error('Upload error:', err);
       // Mark as failed if upload/analysis errored
@@ -83,72 +82,110 @@ function DataImportPage() {
         )
       );
       alert(`Upload failed: ${err.message}\n\nMake sure:\n1. Backend server is running on port 5001\n2. MySQL is running and database 'rsc_globe_db' exists`);
+    } finally {
+      // Hide loading modal
+      setIsUploading(false);
+      setUploadingFileName('');
     }
   };
 
-  // --- Clear File Preview ---
-  const handleClearPreview = () => {
-    setCurrentPreviewFile(null);
-    alert('Preview cleared!');
-  };
-
-  // --- Delete Selected Rows Placeholder ---
-  const handleDeleteSelected = () => {
-    alert('Delete Selected Rows clicked!');
-  };
-
   useEffect(() => {
-    // Load persisted upload data from localStorage
-    try {
-      const saved = localStorage.getItem('uploadedData');
-      if (saved) {
-        setUploadedData(JSON.parse(saved));
+    // Fetch import history from backend
+    const fetchImports = async () => {
+      try {
+        const response = await fetch(`${API_BASE}/imports`);
+        if (response.ok) {
+          const imports = await response.json();
+          // Map backend data to match our component structure
+          const mappedImports = imports.map(imp => ({
+            id: imp.id,
+            file_name: imp.file_name,
+            status: imp.status || 'completed',
+            created_at: imp.import_date || imp.created_at
+          }));
+          setUploadedData(mappedImports);
+        }
+      } catch (err) {
+        console.error('Failed to load import history:', err);
       }
-    } catch (err) {
-      console.error('Failed to load saved upload data:', err);
-      setUploadedData([]);
-    }
-  }, []);
+    };
 
-  // Keep importStats in sync with uploadedData statuses
-  useEffect(() => {
-    const completed = uploadedData.filter(r => r.status === 'Completed').length;
-    const failed = uploadedData.filter(r => r.status === 'Failed').length;
-    const pending = uploadedData.filter(r => r.status === 'Pending').length;
-    setImportStats({ completed, failed, pending });
-    
-    // Persist to localStorage whenever uploadedData changes
+    fetchImports();
+  }, [API_BASE]);
+
+  // Handle checkbox selection
+  const handleSelectImport = (importId) => {
+    setSelectedImports(prev => {
+      if (prev.includes(importId)) {
+        return prev.filter(id => id !== importId);
+      } else {
+        return [...prev, importId];
+      }
+    });
+  };
+
+  // Handle select all
+  const handleSelectAll = (e) => {
+    if (e.target.checked) {
+      setSelectedImports(uploadedData.map(item => item.id));
+    } else {
+      setSelectedImports([]);
+    }
+  };
+
+  // Handle delete selected imports
+  const handleDeleteSelected = async () => {
+    if (selectedImports.length === 0) {
+      alert('Please select at least one import to delete.');
+      return;
+    }
+
+    const confirmDelete = window.confirm(
+      `Are you sure you want to delete ${selectedImports.length} import(s)? This will archive the data in the database.`
+    );
+
+    if (!confirmDelete) return;
+
     try {
-      localStorage.setItem('uploadedData', JSON.stringify(uploadedData));
-    } catch (err) {
-      console.error('Failed to save upload data:', err);
-    }
-  }, [uploadedData]);
+      const response = await fetch(`${API_BASE}/imports`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ids: selectedImports })
+      });
 
-  // --- Chart Data ---
-  const importChartData = {
-    labels: ['Completed', 'Failed', 'Pending'],
-    datasets: [
-      {
-        label: '# of Imports',
-        data: [importStats.completed, importStats.failed, importStats.pending],
-        backgroundColor: [
-          'rgba(54, 162, 235, 0.7)',
-          'rgba(255, 99, 132, 0.7)',
-          'rgba(255, 206, 86, 0.7)',
-        ],
-        borderColor: [
-          'rgba(54, 162, 235, 1)',
-          'rgba(255, 99, 132, 1)',
-          'rgba(255, 206, 86, 1)',
-        ],
-        borderWidth: 1,
-      },
-    ],
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Delete failed: ${errorText}`);
+      }
+
+      const result = await response.json();
+      console.log('Delete result:', result);
+
+      // Refresh the import list
+      const importsRes = await fetch(`${API_BASE}/imports`);
+      if (importsRes.ok) {
+        const imports = await importsRes.json();
+        const mappedImports = imports.map(imp => ({
+          id: imp.id,
+          file_name: imp.file_name,
+          status: imp.status || 'completed',
+          created_at: imp.import_date || imp.created_at
+        }));
+        setUploadedData(mappedImports);
+      }
+
+      // Clear selection
+      setSelectedImports([]);
+
+      alert(`Successfully deleted ${result.deletedCount} import(s) and archived the data.`);
+    } catch (err) {
+      console.error('Delete error:', err);
+      alert(`Failed to delete imports: ${err.message}`);
+    }
   };
 
   return (
-    <div className="data-import-layout">
+    <div className="data-import-page">
       {/* --- Import Modal --- */}
       <ImportModal
         isOpen={isModalOpen}
@@ -156,96 +193,92 @@ function DataImportPage() {
         onImportConfirm={handleImportConfirm}
       />
 
-      <div className="content-wrapper">
-        {/* --- Main Panel --- */}
-        <section className="main-panel">
-          <div className="data-preview-header">
-            <h2>Data Preview</h2>
+      {/* --- Loading Modal --- */}
+      <LoadingModal 
+        isOpen={isUploading}
+        fileName={uploadingFileName}
+        message="Uploading and processing file..."
+      />
 
-            <div className="preview-header-buttons">
-              {uploadedData.length > 0 && (
-                <button
-                  className="delete-rows-btn icon-btn"
-                  onClick={handleDeleteSelected}
-                  title="Delete Selected Rows"
-                >
-                  <span className="material-icons">delete</span>
-                </button>
-              )}
-            </div>
-          </div>
-
-          <p>
-            {currentPreviewFile
-              ? `Previewing: ${currentPreviewFile.name}`
-              : 'Import an Excel file to see a preview.'}
-          </p>
-
-          <div className="data-preview-table-container">
-            <table>
-              <thead>
-                <tr>
-                  {/* ✅ Show checkbox column only if there’s uploaded data */}
-                  {uploadedData.length > 0 && (
-                    <th>
-                      <input type="checkbox" aria-label="select all" />
-                    </th>
-                  )}
-                  <th>ID</th>
-                  <th>File Name</th>
-                  <th>Status</th>
-                  <th>Date Uploaded</th>
-                </tr>
-              </thead>
-              <tbody>
-                {uploadedData.length === 0 ? (
-                  <tr>
-                    <td colSpan="5" style={{ textAlign: 'center' }}>
-                      No uploaded data available.
-                    </td>
-                  </tr>
-                ) : (
-                  uploadedData.map((row) => (
-                    <tr key={row.id}>
-                      {/* ✅ Checkbox only appears when data exists */}
-                      <td>
-                        <input type="checkbox" />
-                      </td>
-                      <td>{row.id}</td>
-                      <td>{row.file_name}</td>
-                      <td>{row.status}</td>
-                      <td>{new Date(row.created_at).toLocaleDateString()}</td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
-        </section>
-
-        {/* --- Side Panel --- */}
-        <aside className="side-panel">
-          <div className="action-buttons">
-            <button className="btn btn-primary" onClick={handleOpenModal}>
-              Import Data
+      <section className="data-import-card">
+        <div className="data-import-card-header">
+          <h2>Recent Data Import</h2>
+          <div className="data-import-card-actions">
+            <button 
+              className="btn btn-danger delete-btn" 
+              onClick={handleDeleteSelected}
+              disabled={selectedImports.length === 0}
+              style={{ marginRight: '10px' }}
+            >
+              🗑️ Delete Selected ({selectedImports.length})
+            </button>
+            <button className="btn btn-secondary import-file-btn" onClick={handleOpenModal}>
+              Import file
             </button>
           </div>
+        </div>
 
-          <div className="statistics-container">
-            <h3>Import Statistics</h3>
-            <div className="chart-wrapper" style={{ height: 200 }}>
-              <Pie
-                data={importChartData}
-                options={{
-                  responsive: true,
-                  maintainAspectRatio: false,
-                  plugins: { legend: { position: 'left' } },
-                }}
-              />
-            </div>
+        <div className="data-import-card-body">
+          <div className="data-preview-area">
+            {uploadedData.length === 0 ? (
+              <div className="data-preview-empty">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>File Name</th>
+                      <th>Date</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td colSpan="3" style={{ textAlign: 'center', padding: '20px' }}>
+                        No imports yet. Upload an Excel file to get started.
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <div className="data-preview-table-container">
+                <table>
+                  <thead>
+                    <tr>
+                      <th style={{ width: '40px' }}>
+                        <input 
+                          type="checkbox" 
+                          checked={selectedImports.length === uploadedData.length && uploadedData.length > 0}
+                          onChange={handleSelectAll}
+                          title="Select all"
+                        />
+                      </th>
+                      <th>File Name</th>
+                      <th>Date</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {uploadedData.map((row) => (
+                      <tr key={row.id}>
+                        <td>
+                          <input 
+                            type="checkbox" 
+                            checked={selectedImports.includes(row.id)}
+                            onChange={() => handleSelectImport(row.id)}
+                          />
+                        </td>
+                        <td>{row.file_name}</td>
+                        <td>{new Date(row.created_at).toLocaleDateString()}</td>
+                        <td>{row.status}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </div>
-        </aside>
-      </div>
+        </div>
+      </section>
     </div>
   );
 }
