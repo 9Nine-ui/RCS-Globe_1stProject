@@ -40,13 +40,13 @@ function ImportModal({ isOpen, onClose, onImportConfirm }) {
 
   return (
     // Modal Overlay
-    <div className="modal-overlay">
+    <div className="modal-overlay" onClick={handleClose}>
       {/* Modal Content Box */}
-      <div className="modal-content">
+      <div className="modal-content" onClick={(e) => e.stopPropagation()}>
         {/* Modal Header */}
         <div className="modal-header">
-          <h2>Import Data from Excel</h2>
-          <button className="modal-close-btn" onClick={handleClose}>
+          <h2>📁 Import Data from Excel</h2>
+          <button className="modal-close-btn" onClick={handleClose} title="Close">
             &times; {/* Close symbol */}
           </button>
         </div>
@@ -59,22 +59,41 @@ function ImportModal({ isOpen, onClose, onImportConfirm }) {
             ref={fileInputRef}
             onChange={handleFileChange}
             style={{ display: 'none' }}
-            accept=".xls, .xlsx, .csv, .txt, .json"
+            accept=".xls, .xlsx, .csv"
           />
 
-          {/* Button to trigger file selection */}
-          <button
-            className="btn btn-secondary select-file-modal-btn"
+          {/* Visual file upload area */}
+          <div 
+            className={`file-upload-area ${selectedFile ? 'has-file' : ''}`}
             onClick={handleSelectFileClick}
           >
-            Select Excel File
-          </button>
-
-          {/* Display selected file name */}
-          {selectedFile && (
-            <p className="selected-file-name">
-              Selected: {selectedFile.name}
+            <div className="upload-icon">📤</div>
+            <p className="upload-text">
+              {selectedFile ? (
+                <>
+                  <strong>{selectedFile.name}</strong>
+                  <br />
+                  <span className="file-size">
+                    {(selectedFile.size / 1024).toFixed(2)} KB
+                  </span>
+                </>
+              ) : (
+                <>
+                  <strong>Click to select a file</strong>
+                  <br />
+                  <span className="file-hint">Supports: Excel (.xlsx, .xls) or CSV</span>
+                </>
+              )}
             </p>
+          </div>
+
+          {selectedFile && (
+            <button 
+              className="btn-change-file"
+              onClick={handleSelectFileClick}
+            >
+              🔄 Change File
+            </button>
           )}
         </div>
 
@@ -88,7 +107,7 @@ function ImportModal({ isOpen, onClose, onImportConfirm }) {
             onClick={handleConfirm}
             disabled={!selectedFile} // Disable if no file selected
           >
-            Confirm Import
+            ✓ Confirm Import
           </button>
         </div>
       </div>

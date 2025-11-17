@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import PageHeader from '../components/PageHeader.jsx';
+import DuplicateDetectionModal from '../components/DuplicateDetectionModal.jsx';
 
 function DataGridPage() {
   const { category } = useParams();
@@ -12,6 +13,10 @@ function DataGridPage() {
   const [totalPages, setTotalPages] = useState(1);
   const [totalRows, setTotalRows] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedRows, setSelectedRows] = useState([]);
+  const [sortColumn, setSortColumn] = useState(null);
+  const [sortDirection, setSortDirection] = useState('asc');
+  const [isDuplicateModalOpen, setIsDuplicateModalOpen] = useState(false);
   const pageSize = 50;
 
   const API_BASE = useMemo(
@@ -29,14 +34,98 @@ function DataGridPage() {
   ];
 
   const handleTabClick = (tabId) => {
-    setCurrentPage(1); // Reset to page 1 when switching tabs
-    setSearchQuery(''); // Clear search when switching tabs
+    setCurrentPage(1);
+    setSearchQuery('');
+    setSelectedRows([]);
     navigate(`/dashboard/data/${tabId}`);
   };
 
   const handleSearchChange = (e) => {
     setSearchQuery(e.target.value);
-    setCurrentPage(1); // Reset to page 1 when searching
+    setCurrentPage(1);
+  };
+
+  const handleSelectAll = (e) => {
+    if (e.target.checked) {
+      setSelectedRows(gridData.map(row => row.id));
+    } else {
+      setSelectedRows([]);
+    }
+  };
+
+  const handleSelectRow = (rowId) => {
+    setSelectedRows(prev => 
+      prev.includes(rowId) 
+        ? prev.filter(id => id !== rowId)
+        : [...prev, rowId]
+    );
+  };
+
+  const handleDeleteSelected = () => {
+    if (selectedRows.length === 0) return;
+    
+    if (window.confirm(`Delete ${selectedRows.length} selected row(s)?`)) {
+      // In a real app, make API call to delete
+      setGridData(prev => prev.filter(row => !selectedRows.includes(row.id)));
+      setSelectedRows([]);
+      alert(`${selectedRows.length} row(s) deleted successfully`);
+    }
+  };
+
+  const handleSort = (column) => {
+    if (sortColumn === column) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortColumn(column);
+      setSortDirection('asc');
+    }
+  };
+
+  const handleExport = () => {
+    const dataToExport = selectedRows.length > 0 
+      ? gridData.filter(row => selectedRows.includes(row.id))
+      : gridData;
+
+    if (dataToExport.length === 0) {
+      alert('No data to export');
+      return;
+    }
+
+    const columns = getTableColumns();
+    const headers = ['Category', 'Tech', ...columns];
+    
+    const csvContent = [
+      headers.join(','),
+      ...dataToExport.map(row => {
+        const rowData = row.row_data || {};
+        return [
+          row.category || '',
+          row.tech || '',
+          ...columns.map(col => {
+            const value = rowData[col];
+            const stringValue = value !== undefined && value !== null ? String(value) : '';
+            return stringValue.includes(',') ? `"${stringValue}"` : stringValue;
+          })
+        ].join(',');
+      })
+    ].join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', `${activeTab}_data_export_${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const handleRemoveDuplicates = (duplicateIds) => {
+    // In a real app, make API call to delete duplicates
+    setGridData(prev => prev.filter(row => !duplicateIds.includes(row.id)));
+    setTotalRows(prev => prev - duplicateIds.length);
+    alert(`Successfully removed ${duplicateIds.length} duplicate record(s)`);
   };
 
   const handlePageChange = (newPage) => {
@@ -120,9 +209,11 @@ function DataGridPage() {
     }
 
     const firstRowData = gridData[0].row_data;
-    // Get all keys from the first row, excluding internal metadata
+    // Get all keys from the first row, excluding internal metadata and TECHNOLOGY column
     return Object.keys(firstRowData).filter(
-      key => !key.startsWith('__') && key.toLowerCase() !== 'sheet'
+      key => !key.startsWith('__') && 
+             key.toLowerCase() !== 'sheet' && 
+             key.toUpperCase() !== 'TECHNOLOGY'
     );
   };
 
@@ -140,23 +231,79 @@ function DataGridPage() {
     }
 
     const dataColumns = getTableColumns();
+    
+    // Apply sorting
+    let filteredData = [...gridData];
+    if (sortColumn) {
+      filteredData = filteredData.sort((a, b) => {
+        let aVal, bVal;
+        
+        if (sortColumn === 'category') {
+          aVal = a.category || '';
+          bVal = b.category || '';
+        } else if (sortColumn === 'tech') {
+          aVal = a.tech || '';
+          bVal = b.tech || '';
+        } else {
+          aVal = a.row_data?.[sortColumn] || '';
+          bVal = b.row_data?.[sortColumn] || '';
+        }
+        
+        if (typeof aVal === 'string') aVal = aVal.toLowerCase();
+        if (typeof bVal === 'string') bVal = bVal.toLowerCase();
+        
+        if (aVal < bVal) return sortDirection === 'asc' ? -1 : 1;
+        if (aVal > bVal) return sortDirection === 'asc' ? 1 : -1;
+        return 0;
+      });
+    }
 
     return (
       <table>
         <thead>
           <tr>
-            <th style={{ minWidth: '100px' }}>Category</th>
-            <th style={{ minWidth: '80px' }}>Tech</th>
+            <th style={{ width: '40px' }}>
+              <input 
+                type="checkbox"
+                checked={selectedRows.length === filteredData.length && filteredData.length > 0}
+                onChange={handleSelectAll}
+              />
+            </th>
+            <th 
+              style={{ minWidth: '100px', cursor: 'pointer' }} 
+              onClick={() => handleSort('category')}
+            >
+              Category {sortColumn === 'category' && (sortDirection === 'asc' ? '↑' : '↓')}
+            </th>
+            <th 
+              style={{ minWidth: '80px', cursor: 'pointer' }}
+              onClick={() => handleSort('tech')}
+            >
+              Tech {sortColumn === 'tech' && (sortDirection === 'asc' ? '↑' : '↓')}
+            </th>
             {dataColumns.map((col) => (
-              <th key={col} style={{ minWidth: '120px' }}>{col}</th>
+              <th 
+                key={col} 
+                style={{ minWidth: '120px', cursor: 'pointer' }}
+                onClick={() => handleSort(col)}
+              >
+                {col} {sortColumn === col && (sortDirection === 'asc' ? '↑' : '↓')}
+              </th>
             ))}
           </tr>
         </thead>
         <tbody>
-          {gridData.map((row, index) => {
+          {filteredData.map((row, index) => {
             const rowData = row.row_data || {};
             return (
-              <tr key={row.id ?? `row-${index}`}>
+              <tr key={row.id ?? `row-${index}`} className={selectedRows.includes(row.id) ? 'selected-row' : ''}>
+                <td>
+                  <input 
+                    type="checkbox"
+                    checked={selectedRows.includes(row.id)}
+                    onChange={() => handleSelectRow(row.id)}
+                  />
+                </td>
                 <td>
                   <span style={{
                     padding: '4px 8px',
@@ -204,6 +351,14 @@ function DataGridPage() {
     <div className="data-grid-layout">
       <PageHeader />
 
+      {/* Duplicate Detection Modal */}
+      <DuplicateDetectionModal 
+        isOpen={isDuplicateModalOpen}
+        onClose={() => setIsDuplicateModalOpen(false)}
+        onRemoveDuplicates={handleRemoveDuplicates}
+        category={activeTab}
+      />
+
       <section className="tab-navigation">
         <label htmlFor="category-select" className="dropdown-label">Select Category:</label>
         <select
@@ -226,7 +381,10 @@ function DataGridPage() {
           
           <div className="header-actions">
             <div className="search-bar">
-              <span className="search-icon">🔍</span>
+              <svg className="search-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="11" cy="11" r="8"></circle>
+                <path d="m21 21-4.35-4.35"></path>
+              </svg>
               <input 
                 type="text" 
                 placeholder="Type here to search..." 
@@ -234,13 +392,19 @@ function DataGridPage() {
                 onChange={handleSearchChange}
               />
             </div>
-            <button className="filter-button">
-              <span className="filter-icon">tune</span>
-              Filter
+            {selectedRows.length > 0 && (
+              <button className="delete-selected-button" onClick={handleDeleteSelected}>
+                <span className="material-icons">delete</span>
+                Delete ({selectedRows.length})
+              </button>
+            )}
+            <button className="find-duplicates-button" onClick={() => setIsDuplicateModalOpen(true)}>
+              <span className="material-icons">find_in_page</span>
+              Find Duplicates
             </button>
-            <button className="export-button">
+            <button className="export-button" onClick={handleExport}>
               <span className="export-icon">file_download</span>
-              Export
+              Export {selectedRows.length > 0 ? `(${selectedRows.length})` : ''}
             </button>
           </div>
         </div>

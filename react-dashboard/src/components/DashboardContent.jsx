@@ -16,8 +16,10 @@ function DashboardContent({ activePreview, onCardClick }) {
 
   const fetchData = async () => {
     try {
-      const response = await fetch(`${API_BASE}/chart-data`);
-      const data = await response.json();
+      // Fetch chart data
+      const chartResponse = await fetch(`${API_BASE}/chart-data`);
+      const data = await chartResponse.json();
+      
       /* data may be either simple counts or detailed breakdown */
       if (data.categories) {
         // detailed structure
@@ -33,6 +35,14 @@ function DashboardContent({ activePreview, onCardClick }) {
           totals: { total: (data.transport||0)+(data.wireless||0)+(data.wireline||0), tech: { '2g': 0, lte: 0, '5g': 0, other: 0 }, techPercent: { '2g': 0, lte: 0, '5g': 0, other: 0 } }
         });
       }
+
+      // Fetch imports history
+      const importsResponse = await fetch(`${API_BASE}/imports?limit=5`);
+      if (importsResponse.ok) {
+        const importsData = await importsResponse.json();
+        setImports(importsData);
+      }
+      
       setLoading(false);
     } catch (error) {
       console.error('Error fetching data:', error);
@@ -42,29 +52,29 @@ function DashboardContent({ activePreview, onCardClick }) {
 
   const summaryData = [
     {
-      title: 'transport',
+      title: 'Transport',
       value: chartData?.categories?.transport?.total || 0,
       stats: { value: chartData?.categories?.transport?.total || 0, label: 'Total Transport', percentage: '0%' }
     },
     {
-      title: 'wireless',
+      title: 'Wireless',
       value: chartData?.categories?.wireless?.total || 0,
       stats: { value: chartData?.categories?.wireless?.total || 0, label: 'Total Wireless', percentage: '0%' }
     },
     {
-      title: 'wireline',
+      title: 'Wireline',
       value: chartData?.categories?.wireline?.total || 0,
       stats: { value: chartData?.categories?.wireline?.total || 0, label: 'Total Wireline', percentage: '0%' }
     },
     {
-      title: 'total no. of data',
+      title: 'Total No. Of Data',
       value: chartData?.totals?.total || 0,
       stats: { value: 'Combined', label: 'All Categories', percentage: '0%' }
     }
   ];
 
   // Title used for the chart/header
-  const chartTitle = `Preview of ${activePreview} Data`;
+  const chartTitle = `Preview of ${activePreview}`;
 
   return (
     <>
@@ -88,7 +98,7 @@ function DashboardContent({ activePreview, onCardClick }) {
         <div className="chart-header">
           <h2>{chartTitle}</h2>
           <Link 
-            to={`/dashboard/data/${activePreview === 'total no. of data' ? 'total' : activePreview}`}
+            to={`/dashboard/data/${activePreview === 'Total No. Of Data' ? 'total' : activePreview.toLowerCase()}`}
             className="view-all-btn btn btn-secondary"
           >
             View All
@@ -100,11 +110,10 @@ function DashboardContent({ activePreview, onCardClick }) {
             <p>Loading data...</p>
           ) : (
             <div className="tech-breakdown">
-              <h4 style={{ marginLeft: '15px' }}>Technology Breakdown ({activePreview})</h4>
+              <h4 style={{ marginLeft: '15px' }}>Tech Breakdown ({activePreview})</h4>
               <table>
                 <thead>
                   <tr>
-                    <th>Technology</th>
                     <th>Count</th>
                     <th>%</th>
                   </tr>
@@ -112,7 +121,6 @@ function DashboardContent({ activePreview, onCardClick }) {
                 <tbody>
                   {['2g','lte','5g','other'].map(t => (
                     <tr key={t}>
-                      <td style={{textTransform:'uppercase'}}>{t}</td>
                       <td>{chartData?.categories?.[activePreview.toLowerCase()]?.tech?.[t] || 0}</td>
                       <td>{(chartData?.categories?.[activePreview.toLowerCase()]?.techPercent?.[t] || 0) + '%'}</td>
                     </tr>

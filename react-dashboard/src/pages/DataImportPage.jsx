@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import ImportModal from '../components/ImportModal.jsx';
 import LoadingModal from '../components/LoadingModal.jsx';
+import ConfirmDeleteModal from '../components/ConfirmDeleteModal.jsx';
+import SuccessModal from '../components/SuccessModal.jsx';
 
 function DataImportPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -9,6 +11,9 @@ function DataImportPage() {
   const [selectedImports, setSelectedImports] = useState([]);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadingFileName, setUploadingFileName] = useState('');
+  const [isConfirmDeleteOpen, setIsConfirmDeleteOpen] = useState(false);
+  const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
 
   // --- Open Import Modal ---
   const handleOpenModal = () => setIsModalOpen(true);
@@ -134,17 +139,16 @@ function DataImportPage() {
   };
 
   // Handle delete selected imports
-  const handleDeleteSelected = async () => {
+  const handleDeleteSelected = () => {
     if (selectedImports.length === 0) {
       alert('Please select at least one import to delete.');
       return;
     }
+    setIsConfirmDeleteOpen(true);
+  };
 
-    const confirmDelete = window.confirm(
-      `Are you sure you want to delete ${selectedImports.length} import(s)? This will archive the data in the database.`
-    );
-
-    if (!confirmDelete) return;
+  const handleConfirmDelete = async () => {
+    setIsConfirmDeleteOpen(false);
 
     try {
       const response = await fetch(`${API_BASE}/imports`, {
@@ -177,7 +181,8 @@ function DataImportPage() {
       // Clear selection
       setSelectedImports([]);
 
-      alert(`Successfully deleted ${result.deletedCount} import(s) and archived the data.`);
+      setSuccessMessage(`Successfully deleted ${result.deletedCount} import(s) and archived the data.`);
+      setIsSuccessModalOpen(true);
     } catch (err) {
       console.error('Delete error:', err);
       alert(`Failed to delete imports: ${err.message}`);
@@ -198,6 +203,21 @@ function DataImportPage() {
         isOpen={isUploading}
         fileName={uploadingFileName}
         message="Uploading and processing file..."
+      />
+
+      {/* --- Confirm Delete Modal --- */}
+      <ConfirmDeleteModal 
+        isOpen={isConfirmDeleteOpen}
+        onClose={() => setIsConfirmDeleteOpen(false)}
+        onConfirm={handleConfirmDelete}
+        count={selectedImports.length}
+      />
+
+      {/* --- Success Modal --- */}
+      <SuccessModal 
+        isOpen={isSuccessModalOpen}
+        onClose={() => setIsSuccessModalOpen(false)}
+        message={successMessage}
       />
 
       <section className="data-import-card">

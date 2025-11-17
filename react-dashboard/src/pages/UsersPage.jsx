@@ -1,7 +1,7 @@
 
 
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState } from 'react';
+import AddUserModal from '../components/AddUserModal.jsx';
 
 // --- Mock Data for Users ---
 const mockUsers = [
@@ -11,14 +11,33 @@ const mockUsers = [
 ];
 
 function UsersPage() {
-  const navigate = useNavigate();
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [users, setUsers] = useState(mockUsers);
 
   const handleAddUser = () => {
-    navigate('/dashboard/users/add'); 
+    setIsModalOpen(true);
+  };
+
+  const handleAddUserSubmit = (userData) => {
+    // In a real app, you would send userData to your backend API
+    const newUser = {
+      id: users.length + 1,
+      ...userData
+    };
+    setUsers([...users, newUser]);
+    setIsModalOpen(false);
+    alert(`User ${userData.firstName} ${userData.lastName} added successfully!`);
   };
 
   return (
     <div className="users-page-layout">
+      {/* Add User Modal */}
+      <AddUserModal 
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onAddUser={handleAddUserSubmit}
+      />
+
       {/* --- MODIFIED: Header now only contains the title --- */}
       <header className="page-header users-page-header">
          <h2>User Management</h2>
@@ -46,7 +65,7 @@ function UsersPage() {
               </tr>
             </thead>
             <tbody>
-              {mockUsers.map((user) => (
+              {users.map((user) => (
                 <tr key={user.id}>
                   <td>{user.firstName}</td>
                   <td>{user.lastName}</td>
