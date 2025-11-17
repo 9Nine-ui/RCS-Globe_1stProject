@@ -190,36 +190,36 @@ function DuplicateDetectionModal({ isOpen, onClose, onRemoveDuplicates, category
                             <div className="duplicate-record-details">
                               <div className="duplicate-record-field">
                                 <span className="field-label">Cell Name:</span>
-                                <span className="field-value">{item['CELL NAME'] || item.cellName}</span>
+                                <span className="field-value">{item.row_data?.['CELL NAME'] || item.row_data?.['Cell Name'] || item['CELL NAME'] || item.cellName || '—'}</span>
                               </div>
                               <div className="duplicate-record-field">
                                 <span className="field-label">Site Name:</span>
-                                <span className="field-value">{item['SITE NAME'] || item.siteName}</span>
+                                <span className="field-value">{item.row_data?.['SITE NAME'] || item.row_data?.['Site Name'] || item['SITE NAME'] || item.siteName || '—'}</span>
                               </div>
                               <div className="duplicate-record-field">
                                 <span className="field-label">Category:</span>
-                                <span className="field-value">{item.CATEGORY || item.category}</span>
+                                <span className="field-value">{item.category || item.CATEGORY || '—'}</span>
                               </div>
                               <div className="duplicate-record-field">
                                 <span className="field-label">Tech:</span>
-                                <span className="field-value">{item.TECH || item.tech}</span>
+                                <span className="field-value">{item.tech || item.TECH || '—'}</span>
                               </div>
-                              {(item.LATITUDE || item.latitude) && (
+                              {(item.row_data?.PLAID || item.row_data?.plaid || item.PLAID || item.plaid) && (
+                                <div className="duplicate-record-field">
+                                  <span className="field-label">PLAID:</span>
+                                  <span className="field-value">{item.row_data?.PLAID || item.row_data?.plaid || item.PLAID || item.plaid}</span>
+                                </div>
+                              )}
+                              {(item.row_data?.LATITUDE || item.row_data?.latitude || item.LATITUDE || item.latitude) && (
                                 <div className="duplicate-record-field">
                                   <span className="field-label">Latitude:</span>
-                                  <span className="field-value">{item.LATITUDE || item.latitude}</span>
+                                  <span className="field-value">{item.row_data?.LATITUDE || item.row_data?.latitude || item.LATITUDE || item.latitude}</span>
                                 </div>
                               )}
-                              {(item.LONGITUDE || item.longitude) && (
+                              {(item.row_data?.LONGITUDE || item.row_data?.longitude || item.LONGITUDE || item.longitude) && (
                                 <div className="duplicate-record-field">
                                   <span className="field-label">Longitude:</span>
-                                  <span className="field-value">{item.LONGITUDE || item.longitude}</span>
-                                </div>
-                              )}
-                              {item.id && (
-                                <div className="duplicate-record-field">
-                                  <span className="field-label">ID:</span>
-                                  <span className="field-value">{item.id}</span>
+                                  <span className="field-value">{item.row_data?.LONGITUDE || item.row_data?.longitude || item.LONGITUDE || item.longitude}</span>
                                 </div>
                               )}
                             </div>

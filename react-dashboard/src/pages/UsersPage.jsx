@@ -3,16 +3,9 @@
 import React, { useState } from 'react';
 import AddUserModal from '../components/AddUserModal.jsx';
 
-// --- Mock Data for Users ---
-const mockUsers = [
-  { id: 1, firstName: 'Juan', lastName: 'Dela Cruz', email: 'juan.delacruz@company.com', role: 'Admin' },
-  { id: 2, firstName: 'Maria', lastName: 'Santos', email: 'maria.santos@company.com', role: 'User' },
-  { id: 3, firstName: 'Pedro', lastName: 'Reyes', email: 'pedro.reyes@company.com', role: 'User' },
-];
-
 function UsersPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [users, setUsers] = useState(mockUsers);
+  const [users, setUsers] = useState([]);
 
   const handleAddUser = () => {
     setIsModalOpen(true);

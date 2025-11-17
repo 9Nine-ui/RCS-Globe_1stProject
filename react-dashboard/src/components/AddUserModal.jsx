@@ -35,6 +35,8 @@ function AddUserModal({ isOpen, onClose, onAddUser }) {
       newErrors.email = 'Email is required';
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
       newErrors.email = 'Please enter a valid email address';
+    } else if (!formData.email.toLowerCase().endsWith('@globetelecom.com')) {
+      newErrors.email = 'Email must be a @globetelecom.com address';
     }
     
     if (!formData.password) {
