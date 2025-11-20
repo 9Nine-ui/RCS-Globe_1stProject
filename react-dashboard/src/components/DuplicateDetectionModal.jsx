@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 
 function DuplicateDetectionModal({ isOpen, onClose, onRemoveDuplicates, category }) {
   const [duplicates, setDuplicates] = useState([]);
@@ -7,13 +7,7 @@ function DuplicateDetectionModal({ isOpen, onClose, onRemoveDuplicates, category
 
   const API_BASE = (import.meta.env && import.meta.env.VITE_API_BASE_URL) || 'http://localhost:5001';
 
-  useEffect(() => {
-    if (isOpen) {
-      fetchDuplicates();
-    }
-  }, [isOpen, category]);
-
-  const fetchDuplicates = async () => {
+  const fetchDuplicates = useCallback(async () => {
     setIsLoading(true);
     try {
       const categoryParam = category === 'total' ? 'all' : category;
@@ -34,7 +28,13 @@ function DuplicateDetectionModal({ isOpen, onClose, onRemoveDuplicates, category
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [category, API_BASE]);
+
+  useEffect(() => {
+    if (isOpen) {
+      fetchDuplicates();
+    }
+  }, [isOpen, fetchDuplicates]);
 
   const findDuplicates = (rows) => {
     const groups = {};
@@ -57,7 +57,7 @@ function DuplicateDetectionModal({ isOpen, onClose, onRemoveDuplicates, category
 
     // Filter to only groups with duplicates
     return Object.entries(groups)
-      .filter(([_, items]) => items.length > 1)
+      .filter(([, items]) => items.length > 1)
       .map(([key, items]) => ({
         key,
         count: items.length,

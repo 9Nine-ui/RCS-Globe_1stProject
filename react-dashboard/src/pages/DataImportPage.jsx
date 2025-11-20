@@ -6,7 +6,6 @@ import SuccessModal from '../components/SuccessModal.jsx';
 
 function DataImportPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [currentPreviewFile, setCurrentPreviewFile] = useState(null);
   const [uploadedData, setUploadedData] = useState([]);
   const [selectedImports, setSelectedImports] = useState([]);
   const [isUploading, setIsUploading] = useState(false);
@@ -22,7 +21,6 @@ function DataImportPage() {
   const API_BASE = (import.meta.env && import.meta.env.VITE_API_BASE_URL) || 'http://localhost:5001';
 
   const handleImportConfirm = async (file) => {
-    setCurrentPreviewFile(file);
     setIsModalOpen(false);
     
     // Show loading modal

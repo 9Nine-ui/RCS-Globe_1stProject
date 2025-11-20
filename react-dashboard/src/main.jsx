@@ -53,6 +53,7 @@ import DataGridPage from './pages/DataGridPage.jsx';
 import LoginPage from './pages/LoginPage.jsx'; // <-- IMPORT THE NEW LOGIN PAGE
 import UsersPage from './pages/UsersPage.jsx';
 import AddUserPage from './pages/AddUserPage.jsx'; // <-- IMPORT THE NEW PAGE
+import ArchivePage from './pages/ArchivePage.jsx'; // <-- IMPORT THE ARCHIVE PAGE
 
 // 2. Define your new routes
 const router = createBrowserRouter([
@@ -82,6 +83,10 @@ const router = createBrowserRouter([
       },
       { path: 'users/add', 
         element: <AddUserPage /> 
+      },
+      {
+        path: 'archive',
+        element: <ArchivePage />,
       },
     ],
   },

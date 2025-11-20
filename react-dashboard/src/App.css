@@ -2212,3 +2212,223 @@ body {
   margin: 5px 0 0 0;
 }
 
+/* ============================================
+--- ARCHIVE PAGE STYLES ---
+============================================
+*/
+
+.archive-page {
+  padding: 30px;
+}
+
+.archive-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 25px;
+  gap: 20px;
+}
+
+.archive-info h3 {
+  margin: 0 0 8px 0;
+  font-size: 1.5em;
+  color: #2d3748;
+}
+
+.archive-description {
+  color: #718096;
+  font-size: 0.95em;
+  margin: 0;
+}
+
+.archive-actions {
+  display: flex;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.archive-search-bar {
+  margin-bottom: 25px;
+}
+
+.search-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  background: #f7fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 50px;
+  padding: 10px 20px;
+  transition: all 0.2s ease;
+  max-width: 500px;
+  width: 100%;
+}
+
+.search-input-wrapper:focus-within {
+  background: white;
+  border-color: #cbd5e0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.search-icon {
+  width: 20px;
+  height: 20px;
+  margin-right: 12px;
+  color: #a0aec0;
+  flex-shrink: 0;
+}
+
+.search-input {
+  flex: 1;
+  border: none;
+  outline: none;
+  font-size: 0.9em;
+  color: #2d3748;
+  background: transparent;
+}
+
+.search-input::placeholder {
+  color: #cbd5e0;
+  font-weight: 400;
+}
+
+.clear-search-btn {
+  background: none;
+  border: none;
+  font-size: 1.3em;
+  color: #a0aec0;
+  cursor: pointer;
+  padding: 0 5px;
+  margin-left: 8px;
+  transition: color 0.2s ease;
+  line-height: 1;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.clear-search-btn:hover {
+  color: #718096;
+  background: #e2e8f0;
+}
+
+.search-results-count {
+  margin: 10px 0 0 0;
+  text-align: center;
+  font-size: 0.85em;
+  color: #718096;
+  font-weight: 400;
+}
+
+.archive-table-container {
+  overflow-x: auto;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.archive-table-container table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95em;
+}
+
+.archive-table-container thead {
+  background: linear-gradient(135deg, #0886B5 0%, #46A6C8 100%);
+  color: white;
+}
+
+.archive-table-container th {
+  padding: 14px 16px;
+  text-align: left;
+  font-weight: 600;
+  border: none;
+}
+
+.archive-table-container tbody tr {
+  border-bottom: 1px solid #e2e8f0;
+  transition: background-color 0.2s ease;
+}
+
+.archive-table-container tbody tr:hover {
+  background-color: #f7fafc;
+}
+
+.archive-table-container td {
+  padding: 14px 16px;
+  color: #2d3748;
+}
+
+.archive-table-container input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+}
+
+.category-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 0.85em;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.category-badge.category-Wireless {
+  background-color: #e3f2fd;
+  color: #1976d2;
+}
+
+.category-badge.category-Wireline {
+  background-color: #fff3e0;
+  color: #e65100;
+}
+
+.category-badge.category-Transport {
+  background-color: #f3e5f5;
+  color: #7b1fa2;
+}
+
+.tech-badge {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 4px;
+  background-color: #e8f4f8;
+  color: #0886B5;
+  font-size: 0.85em;
+  font-weight: 500;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 80px 20px;
+  color: #718096;
+}
+
+.empty-icon {
+  font-size: 5em;
+  margin-bottom: 20px;
+  opacity: 0.4;
+}
+
+.empty-state h3 {
+  font-size: 1.5em;
+  color: #2d3748;
+  margin: 0 0 10px 0;
+}
+
+.empty-state p {
+  font-size: 1em;
+  margin: 0;
+}
+
+.loading-message {
+  text-align: center;
+  padding: 60px 20px;
+  color: #718096;
+  font-size: 1.1em;
+}
+

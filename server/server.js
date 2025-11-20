@@ -1044,6 +1044,171 @@ app.get('/api/uploads/:category', async (req, res) => {
 });
 
 const PORT = process.env.PORT || 5001;
+
+// Archive API endpoints
+app.get('/api/archives', async (req, res) => {
+    try {
+        if (useMySQLStorage) {
+            const [rows] = await pool.query(`
+                SELECT id, archived_import_id, original_processed_id, original_import_id,
+                       file_name, import_date, category, tech, row_data, deleted_at as archived_date
+                FROM archived_processed_rows
+                ORDER BY deleted_at DESC
+                LIMIT 1000
+            `);
+            
+            const mappedRows = rows.map(row => ({
+                id: row.id,
+                archived_import_id: row.archived_import_id,
+                original_processed_id: row.original_processed_id,
+                original_import_id: row.original_import_id,
+                file_name: row.file_name,
+                import_date: row.import_date,
+                category: row.category,
+                tech: row.tech,
+                row_data: typeof row.row_data === 'string' ? JSON.parse(row.row_data) : row.row_data,
+                archived_date: row.archived_date
+            }));
+            
+            return res.json(mappedRows);
+        } else {
+            // In-memory storage
+            return res.json(inMemoryData.archivedProcessedRows || []);
+        }
+    } catch (error) {
+        console.error('Error fetching archives:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+app.post('/api/archives/restore', async (req, res) => {
+    try {
+        const ids = Array.isArray(req.body?.ids) ? req.body.ids : [];
+        const normalizedIds = ids.map(id => Number(id)).filter(id => Number.isInteger(id) && id > 0);
+        
+        if (normalizedIds.length === 0) {
+            return res.status(400).json({ error: 'No valid archive IDs provided' });
+        }
+        
+        if (useMySQLStorage) {
+            let connection;
+            try {
+                connection = await pool.getConnection();
+                await connection.beginTransaction();
+                
+                const placeholders = normalizedIds.map(() => '?').join(',');
+                
+                // Get archived rows to restore
+                const [archivedRows] = await connection.query(
+                    `SELECT * FROM archived_processed_rows WHERE id IN (${placeholders})`,
+                    normalizedIds
+                );
+                
+                if (archivedRows.length > 0) {
+                    // Restore to processed_rows table
+                    const rowsToInsert = archivedRows.map(row => [
+                        row.original_import_id,
+                        row.file_name,
+                        row.import_date ? new Date(row.import_date) : new Date(),
+                        row.category || 'wireless',
+                        row.tech || 'other',
+                        typeof row.row_data === 'string' ? row.row_data : JSON.stringify(row.row_data)
+                    ]);
+                    
+                    const chunkSize = 1000;
+                    for (let i = 0; i < rowsToInsert.length; i += chunkSize) {
+                        const chunk = rowsToInsert.slice(i, i + chunkSize);
+                        await connection.query(
+                            `INSERT INTO ${processedRowsTable} (import_id, file_name, import_date, category, tech, row_data) VALUES ?`,
+                            [chunk]
+                        );
+                    }
+                    
+                    // Delete from archive
+                    await connection.query(
+                        `DELETE FROM archived_processed_rows WHERE id IN (${placeholders})`,
+                        normalizedIds
+                    );
+                }
+                
+                await connection.commit();
+                await refreshChartDataMySQL();
+                
+                return res.json({ message: 'Records restored successfully', restoredCount: archivedRows.length });
+            } catch (error) {
+                if (connection) {
+                    try {
+                        await connection.rollback();
+                    } catch (rollbackError) {
+                        console.error('Rollback failed:', rollbackError.message);
+                    }
+                }
+                throw error;
+            } finally {
+                if (connection) {
+                    connection.release();
+                }
+            }
+        } else {
+            // In-memory restore
+            const idsToRestore = new Set(normalizedIds);
+            const rowsToRestore = inMemoryData.archivedProcessedRows.filter(item => idsToRestore.has(item.id));
+            
+            rowsToRestore.forEach(row => {
+                inMemoryData.processedRows.push({
+                    ...row,
+                    id: inMemoryProcessedId++
+                });
+            });
+            
+            inMemoryData.archivedProcessedRows = inMemoryData.archivedProcessedRows.filter(
+                item => !idsToRestore.has(item.id)
+            );
+            
+            refreshChartDataInMemory();
+            
+            return res.json({ message: 'Records restored successfully', restoredCount: rowsToRestore.length });
+        }
+    } catch (error) {
+        console.error('Error restoring archives:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+app.delete('/api/archives/delete', async (req, res) => {
+    try {
+        const ids = Array.isArray(req.body?.ids) ? req.body.ids : [];
+        const normalizedIds = ids.map(id => Number(id)).filter(id => Number.isInteger(id) && id > 0);
+        
+        if (normalizedIds.length === 0) {
+            return res.status(400).json({ error: 'No valid archive IDs provided' });
+        }
+        
+        if (useMySQLStorage) {
+            const placeholders = normalizedIds.map(() => '?').join(',');
+            const [result] = await pool.query(
+                `DELETE FROM archived_processed_rows WHERE id IN (${placeholders})`,
+                normalizedIds
+            );
+            
+            return res.json({ message: 'Records deleted permanently', deletedCount: result.affectedRows });
+        } else {
+            // In-memory delete
+            const idsToDelete = new Set(normalizedIds);
+            const before = inMemoryData.archivedProcessedRows.length;
+            inMemoryData.archivedProcessedRows = inMemoryData.archivedProcessedRows.filter(
+                item => !idsToDelete.has(item.id)
+            );
+            const deletedCount = before - inMemoryData.archivedProcessedRows.length;
+            
+            return res.json({ message: 'Records deleted permanently', deletedCount });
+        }
+    } catch (error) {
+        console.error('Error deleting archives:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });

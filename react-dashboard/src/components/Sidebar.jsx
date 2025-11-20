@@ -83,6 +83,7 @@ function Sidebar() {
   const navItems = [
     { name: 'Dashboard', icon: '📊', path: '/dashboard' },
     { name: 'Data Import', icon: '📥', path: '/dashboard/import' },
+    { name: 'Archive', icon: '📦', path: '/dashboard/archive' },
   ];
 
   return (

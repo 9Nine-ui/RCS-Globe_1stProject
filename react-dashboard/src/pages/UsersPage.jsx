@@ -2,10 +2,18 @@
 
 import React, { useState } from 'react';
 import AddUserModal from '../components/AddUserModal.jsx';
+import SuccessModal from '../components/SuccessModal.jsx';
 
 function UsersPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [users, setUsers] = useState([]);
+  const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
+  
+  // Get current user role from localStorage or context
+  // In a real app, this would come from authentication context
+  const currentUserRole = localStorage.getItem('userRole') || 'User'; // Default to 'User' for testing
+  const isAdmin = currentUserRole === 'Admin';
 
   const handleAddUser = () => {
     setIsModalOpen(true);
@@ -19,7 +27,10 @@ function UsersPage() {
     };
     setUsers([...users, newUser]);
     setIsModalOpen(false);
-    alert(`User ${userData.firstName} ${userData.lastName} added successfully!`);
+    
+    // Show success modal instead of alert
+    setSuccessMessage(`User ${userData.firstName} ${userData.lastName} added successfully!`);
+    setIsSuccessModalOpen(true);
   };
 
   return (
@@ -29,6 +40,13 @@ function UsersPage() {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onAddUser={handleAddUserSubmit}
+      />
+
+      {/* Success Modal */}
+      <SuccessModal 
+        isOpen={isSuccessModalOpen}
+        message={successMessage}
+        onClose={() => setIsSuccessModalOpen(false)}
       />
 
       {/* --- MODIFIED: Header now only contains the title --- */}
@@ -41,9 +59,11 @@ function UsersPage() {
         {/* --- MODIFIED: New container for heading and button --- */}
         <div className="current-users-header">
           <h3>Current Users</h3>
-          <button className="btn btn-primary add-user-btn" onClick={handleAddUser}>
-           Add User
-          </button>
+          {isAdmin && (
+            <button className="btn btn-primary add-user-btn" onClick={handleAddUser}>
+              Add User
+            </button>
+          )}
         </div>
         {/* --- End of modification --- */}
         
@@ -53,7 +73,6 @@ function UsersPage() {
               <tr>
                 <th>First Name</th>
                 <th>Last Name</th>
-                <th>Email Address</th>
                 <th>Role</th> 
               </tr>
             </thead>
@@ -62,7 +81,6 @@ function UsersPage() {
                 <tr key={user.id}>
                   <td>{user.firstName}</td>
                   <td>{user.lastName}</td>
-                  <td>{user.email}</td>
                   <td>{user.role}</td>
                 </tr>
               ))}
