@@ -341,22 +341,31 @@ function detectTechFromRow(row) {
         .map(v => v.toString().toUpperCase())
         .join(' ');
 
-    // 5G / NR
-    if (/(\bN78\b|\bN41\b|\bNR26\b|\bNR35\b|\bNR700\b|\bNR\b|\b5G\b)/.test(hay)) return '5g';
+    // Check TECHNOLOGY column explicitly first
+    const techColumn = row.TECHNOLOGY || row.Technology || row.technology || '';
+    const techStr = techColumn.toString().toUpperCase();
+    
+    // Wireline technologies (GPON, LSA, MSAN) - these are wireline tech
+    if (/(\bGPON\b|\bLSA\b|\bMSAN\b)/.test(hay) || /(\bGPON\b|\bLSA\b|\bMSAN\b)/.test(techStr)) {
+        return 'wireline';
+    }
 
-    // LTE (FDD/TDD codes and common tokens)
-    if (/(\bLTE\b|\bL7\b|\bL9\b|\bL18\b|\bL1800\b|\bL21\b|\bL2100\b|\bL23\b|\bL26\b|\bL2600\b|\bL28\b|\bL700\b|\bL40\b|\bL2300\b|\bMM26\b)/.test(hay)) return 'lte';
+    // 5G / NR
+    if (/(\bN78\b|\bN41\b|\bNR26\b|\bNR35\b|\bNR700\b|\bNR\b|\b5G\b)/.test(hay) || /5G/.test(techStr)) return '5g';
+
+    // 4G/LTE (FDD/TDD codes and common tokens)
+    if (/(\bLTE\b|\b4G\b|\bL7\b|\bL9\b|\bL18\b|\bL1800\b|\bL21\b|\bL2100\b|\bL23\b|\bL26\b|\bL2600\b|\bL28\b|\bL700\b|\bL40\b|\bL2300\b|\bMM26\b)/.test(hay) || /4G|LTE/.test(techStr)) return 'lte';
 
     // 3G
-    if (/(\bU9\b|\bU900\b|\bU21\b|\bU2100\b|\b3G\b|UMTS|WCDMA|HSPA)/.test(hay)) return '3g';
+    if (/(\bU9\b|\bU900\b|\bU21\b|\bU2100\b|\b3G\b|UMTS|WCDMA|HSPA)/.test(hay) || /3G|UMTS|WCDMA/.test(techStr)) return '3g';
 
     // 2G (GSM bands/codes)
-    if (/(\bG9\b|\bG900\b|\bG18\b|\bG1800\b|\b2G\b|GSM)/.test(hay)) return '2g';
+    if (/(\bG9\b|\bG900\b|\bG18\b|\bG1800\b|\b2G\b|GSM)/.test(hay) || /2G|GSM/.test(techStr)) return '2g';
 
     return 'other';
 }
 
-// Helper: detect category; default wireless for radio techs
+// Helper: detect category; improved logic for wireline tech
 function detectCategoryFromRow(row, inferredTech) {
     const explicit = (row.Category || row.category || row.CATEGORY || '').toString().toLowerCase();
     if (explicit.includes('transport')) return 'transport';
@@ -368,13 +377,16 @@ function detectCategoryFromRow(row, inferredTech) {
         .map(v => v.toString().toLowerCase())
         .join(' ');
 
+    // If tech is wireline (GPON, LSA, MSAN), category is wireline
+    if (inferredTech === 'wireline') return 'wireline';
+
     // Wireline keywords
-    if (/(fiber|fibre|ftth|fttx|copper|dsl|wired|osp|duct|splice|odf|ofc)/.test(hay)) return 'wireline';
+    if (/(fiber|fibre|ftth|fttx|copper|dsl|wired|osp|duct|splice|odf|ofc|gpon|lsa|msan)/.test(hay)) return 'wireline';
 
     // Transport/backhaul keywords
     if (/(transport|backhaul|mpls|ip\s?\b|l2vpn|vlan|microwave|mw|ethernet|ptp|sdh|pdh)/.test(hay)) return 'transport';
 
-    // Wireless indicators: tech present or RAN-specific terms
+    // Wireless indicators: tech present or RAN-specific terms (2G, 3G, 4G, 5G)
     if (['2g', '3g', 'lte', '5g'].includes(inferredTech)) return 'wireless';
     if (/(bts|enodeb|gnodeb|gnb|nodeb|trx|oml|rnc|bbu|ru\b|rru|lte|wcdma|umts|gsm|nr|radio)/.test(hay)) return 'wireless';
 
@@ -912,6 +924,10 @@ app.get('/api/uploads/:category', async (req, res) => {
         const hasSearch = searchRaw.length > 0;
         const normalizedSearch = searchRaw.toLowerCase();
 
+        // Technology filters from query params
+        const techFilters = req.query.tech ? req.query.tech.split(',').map(t => t.toLowerCase()) : [];
+        const hasTechFilter = techFilters.length > 0;
+
         const page = Math.max(1, parseInt(req.query.page, 10) || 1);
         const pageSizeRaw = parseInt(req.query.pageSize, 10);
         const boundedPageSize = Number.isFinite(pageSizeRaw) ? pageSizeRaw : NaN;
@@ -937,6 +953,12 @@ app.get('/api/uploads/:category', async (req, res) => {
             if (normalizedCategory !== 'all') {
                 clauses.push('category = ?');
                 filters.push(normalizedCategory);
+            }
+
+            if (hasTechFilter) {
+                const techPlaceholders = techFilters.map(() => '?').join(',');
+                clauses.push(`tech IN (${techPlaceholders})`);
+                filters.push(...techFilters);
             }
 
             if (hasSearch) {
@@ -988,6 +1010,10 @@ app.get('/api/uploads/:category', async (req, res) => {
         let rows = inMemoryData.processedRows;
         if (normalizedCategory !== 'all') {
             rows = rows.filter(item => item.category === normalizedCategory);
+        }
+
+        if (hasTechFilter) {
+            rows = rows.filter(item => techFilters.includes((item.tech || '').toLowerCase()));
         }
 
         if (hasSearch) {

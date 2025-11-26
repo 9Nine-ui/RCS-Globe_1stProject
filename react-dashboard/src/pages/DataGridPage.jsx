@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import PageHeader from '../components/PageHeader.jsx';
 import DuplicateDetectionModal from '../components/DuplicateDetectionModal.jsx';
+import AdvancedFilter from '../components/AdvancedFilter.jsx';
 
 function DataGridPage() {
   const { category } = useParams();
@@ -13,6 +14,7 @@ function DataGridPage() {
   const [totalPages, setTotalPages] = useState(1);
   const [totalRows, setTotalRows] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
+  const [techFilters, setTechFilters] = useState([]);
   const [selectedRows, setSelectedRows] = useState([]);
   const [sortColumn, setSortColumn] = useState(null);
   const [sortDirection, setSortDirection] = useState('asc');
@@ -36,12 +38,18 @@ function DataGridPage() {
   const handleTabClick = (tabId) => {
     setCurrentPage(1);
     setSearchQuery('');
+    setTechFilters([]);
     setSelectedRows([]);
     navigate(`/dashboard/data/${tabId}`);
   };
 
   const handleSearchChange = (e) => {
     setSearchQuery(e.target.value);
+    setCurrentPage(1);
+  };
+
+  const handleApplyFilters = (filters) => {
+    setTechFilters(filters.tech || []);
     setCurrentPage(1);
   };
 
@@ -173,8 +181,9 @@ function DataGridPage() {
       try {
         const categoryParam = activeTab === 'total' ? 'all' : activeTab;
         const searchParam = searchQuery ? `&search=${encodeURIComponent(searchQuery)}` : '';
+        const techParam = techFilters.length > 0 ? `&tech=${techFilters.join(',')}` : '';
         const response = await fetch(
-          `${API_BASE}/api/uploads/${categoryParam}?page=${currentPage}&pageSize=${pageSize}${searchParam}`
+          `${API_BASE}/api/uploads/${categoryParam}?page=${currentPage}&pageSize=${pageSize}${searchParam}${techParam}`
         );
 
         if (!response.ok) {
@@ -196,7 +205,7 @@ function DataGridPage() {
     };
 
     fetchData();
-  }, [API_BASE, activeTab, currentPage, pageSize, searchQuery]);
+  }, [API_BASE, activeTab, currentPage, pageSize, searchQuery, techFilters]);
 
   const getHeading = () => (
     activeTab === 'total' ? 'All Data Uploaded' : `Files of ${activeTab}`
@@ -392,6 +401,10 @@ function DataGridPage() {
                 onChange={handleSearchChange}
               />
             </div>
+            <AdvancedFilter 
+              onApplyFilters={handleApplyFilters}
+              initialFilters={{ tech: techFilters }}
+            />
             {selectedRows.length > 0 && (
               <button className="delete-selected-button" onClick={handleDeleteSelected}>
                 <span className="material-icons">delete</span>
